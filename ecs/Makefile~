@@ -1,0 +1,49 @@
+##
+## EPITECH PROJECT, 2018
+## ElSandbox: ECS
+## File description:
+## Makefile
+##
+
+NAME		=	ecs
+
+CXX		=	g++
+
+RM		=	rm -f
+
+SRCS		=	./src/Component.cpp	\
+			./src/Entity.cpp	\
+			./src/EntityHandle.cpp	\
+			./src/Manager.cpp
+
+OBJS		=	$(SRCS:.cpp=.o)
+
+TESTNAME	=	tests
+TESTSRCS	=	$(SRCS:.cpp=_test.cpp)
+TESTOBJS	=	$(TESTSRCS:.cpp=.o)
+
+CPPFLAGS	=	-I ./include/ -I../
+CPPFLAGS	+=	-W -Wall -Wextra -Werror
+
+all: debug
+
+exec:	$(NAME)
+
+debug:	CPPFLAGS += -ggdb
+debug:	exec
+
+$(NAME): $(OBJS)
+	 $(CXX) $(OBJS) -o $(NAME) $(LDFLAGS)
+
+test: $(TESTOBJS)
+	$(CXX) $(TESTOBJS) -o $(TESTNAME) $(LDFLAGS)
+
+clean:
+	$(RM) $(OBJS) $(TESTOBJS)
+
+fclean: clean
+	$(RM) $(NAME) $(TESTNAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re
