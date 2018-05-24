@@ -1,0 +1,3 @@
+Signatures:
+	- Compare against std::bitset (SimpleSignature of an entity)
+	- Compose With SignatureAnd, SignatureOr and SignatureNot
