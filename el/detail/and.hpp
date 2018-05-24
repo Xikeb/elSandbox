@@ -30,8 +30,8 @@
 		} // impl
 
 		namespace detail {
-			template<bool a, bool b, bool ...rest>
-			using _and = typename el::impl::_and<a, b, rest...>::Result;
+			template<bool ...values>
+			using _and = typename el::impl::_and<values...>::Result;
 		} // detail
 	} // el
 #endif // ELMETA_AND_HPP
