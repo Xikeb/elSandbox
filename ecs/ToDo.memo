@@ -1,3 +1,9 @@
 Signatures:
-	- Compare against std::bitset (SimpleSignature of an entity)
-	- Compose With SignatureAnd, SignatureOr and SignatureNot
+	- Compare Components and Tags
+	$ Compare against std::bitset (SimpleSignature of an entity)
+	$ Compose With SignatureAnd, SignatureOr and SignatureNot
+	? Signature Any
+	-System Object
+		- Dependencies
+		- One time or keep
+	-Entity metadata
