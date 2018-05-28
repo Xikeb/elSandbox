@@ -31,25 +31,63 @@
 		constexpr auto isSignature(TSig &&sig) noexcept -> decltype(isSigFunctor<TSig>) {
 			return isSigFunctor<TSig::length()>(std::forward<TSig>(sig));
 		}
-
-		template<typename TList>
-		class Signature {
+		#include <string>
+		template<typename TSettings, typename TComponents, typename TTags>
+		class SignatureStorage {
 		public:
-			using List = TList;
-			constexpr Signature() = default;
+			using This = SignatureStorage<TSettings, TComponents, TTags>;
+			using Settings = TSettings;
+			using Components = typename Settings::Components;
+			using Tags = typename Settings::Tags;
+			SignatureStorage() = default;
 
-			constexpr static std::size_t length() noexcept {
-				return List::size;
-			}
-
-			using Bitset = std::bitset<length()>;
-
-			bool compare(Bitset const &othPrint) const
+			template<std::size_t ...CIdxs, std::size_t ...TIdxs>
+			void test(std::index_sequence<CIdxs...>, std::index_sequence<TIdxs...>)
 			{
-				return (this->_print & othPrint) == this->_print;
+				char a[] = {el::conditional<
+					TComponents::template Contains<Components::template At<CIdxs>>::value,
+					el::char_c<'0'>, el::char_c<'1'>
+				>::type::value...};
+				std::string s(char[3](el::conditional<
+					TComponents::template Contains<Components::template At<CIdxs>>::value,
+					el::char_c<'0'>, el::char_c<'1'>
+				>::type::value...));
+
+
 			}
 		private:
-			Bitset _print;
+			std::bitset<Components::size> _componentSig;
+			std::bitset<Tags::size> _tagSig;
+
+			template<std::size_t ...CIdxs, std::size_t ...TIdxs>
+			SignatureStorage(std::index_sequence<CIdxs...>, std::index_sequence<TIdxs...>):
+			_componentSig()
+			{
+			}
+		};
+
+		template<typename TList, typename TSettings>
+		class Signature {
+		public:
+			using Settings = TSettings;
+			using Components = typename Settings::Components;
+			using Tags = typename Settings::Tags;
+			constexpr Signature() = default;
+
+			constexpr static std::size_t componentsCount() {
+				return Components::size;
+			}
+
+			constexpr static std::size_t tagsCount() {
+				return Tags::size;
+			}
+
+			// bool compare(Bitset const &othPrint) const
+			// {
+			// 	return (this->_print & othPrint) == this->_print;
+			// }
+		private:
+			// Bitset _print;
 		};
 
 		template<typename ...TSigs>
