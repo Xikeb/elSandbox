@@ -10,6 +10,7 @@
 	#include <cstdlib>
 	#include <tuple>
 	#include <vector>
+	#include "el/type_list/type_list.h"
 
 	namespace ecs {
 		template<typename TSettings>
@@ -33,7 +34,7 @@
 						"No such component."
 					);
 				return std::get<
-					el::IndexOf<>
+					TComponentList::IndexOf<T>
 				>(this->_componentStorage);
 			}
 
@@ -41,6 +42,7 @@
 			template<typename T>
 			using TupleOfVectors = std::tuple<std::vector<T>>;
 
+			std::vector<ecs::Entity<TSettings>> _entities;
 			el::Rename<TupleOfVectors, TComponentList> _componentStorage;
 			std::size_t _size;
 			std::size_t _capacity;

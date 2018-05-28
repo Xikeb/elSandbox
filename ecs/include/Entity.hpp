@@ -7,20 +7,23 @@
 
 #ifndef ENTITY_H_
 	#define ENTITY_H_
+	#include <bitset>
 
+	template<typename TSettings>
 	class Entity {
 	public:
+		using Components = TSettings::Components;
+		using Tags = TSettings::Tags;
 		Entity();
 		virtual ~Entity();
-		bool	hasComponent<class C>();
-		bool	attachComponent<class C>(Manager world, EntityHandle h);
-		bool	detachComponen<class C>(Manager world, EntityHandle h);
-		bool	inUse();
-		bool	inUse(bool state);
 
+		template<typename TSignature>
+		bool matchesSignature(void)
+		{
+			return TSignature::compare()
+		}
 	private:
-		bool			inUse;
-		size_t			componentColumn;
+
 		SignatureBitset	signature;
 	};
 #endif /* ENTITY_H_ */
