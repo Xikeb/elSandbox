@@ -8,87 +8,215 @@
 	#include "el/types/is_valid.hpp"
 	
 	namespace ecs {
-		template<std::size_t Length>
-		struct SignatureConcept {
-			using Bitset = std::bitset<Length>;
-
-			constexpr SignatureConcept() = default;
-
-			constexpr static auto canCompare = el::is_valid([](auto &&sig) -> bool {
-				return sig.compare(Bitset{});
-			});
-
-			template<typename TSig>
-			constexpr auto operator()(TSig&& sig) {
-				return canCompare(sig);
-			}
-		};
-
-		template<std::size_t Length>
-		constexpr static ecs::SignatureConcept<Length> isSigFunctor{};
-
-		template<typename TSig>
-		constexpr auto isSignature(TSig &&sig) noexcept -> decltype(isSigFunctor<TSig>) {
-			return isSigFunctor<TSig::length()>(std::forward<TSig>(sig));
-		}
-		#include <string>
-		template<typename TSettings, typename TComponents, typename TTags>
+		template<typename TSettings>
 		class SignatureStorage {
 		public:
-			using This = SignatureStorage<TSettings, TComponents, TTags>;
 			using Settings = TSettings;
 			using Components = typename Settings::Components;
 			using Tags = typename Settings::Tags;
-			SignatureStorage() = default;
 
-			template<std::size_t ...CIdxs, std::size_t ...TIdxs>
-			void test(std::index_sequence<CIdxs...>, std::index_sequence<TIdxs...>)
+			constexpr SignatureStorage(const char components[], const char tags[]):
+			_componentBits(components), _tagBits(tags)
 			{
-				char a[] = {el::conditional<
-					TComponents::template Contains<Components::template At<CIdxs>>::value,
-					el::char_c<'0'>, el::char_c<'1'>
-				>::type::value...};
-				std::string s(char[3](el::conditional<
-					TComponents::template Contains<Components::template At<CIdxs>>::value,
-					el::char_c<'0'>, el::char_c<'1'>
-				>::type::value...));
-
-
 			}
+
+			constexpr static std::size_t componentsCount() noexcept
+			{
+				return Components::size;
+			}
+
+			constexpr static std::size_t tagsCount() noexcept
+			{
+				return Tags::size;
+			}
+
+			template<typename T>
+			bool hasComponent() const noexcept
+			{
+				using Index = typename Components::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Component not part of this signature's settings.");
+				return this->_componentBits[Index::value];
+			}
+
+			template<typename T>
+			SignatureStorage &enableComponent() noexcept
+			{
+				using Index = typename Components::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Component not part of this signature's settings.");
+				this->_componentBits[Index::value] = true;
+				return *this;
+			}
+
+			template<typename T>
+			SignatureStorage &disableComponent() noexcept
+			{
+				using Index = typename Components::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Component not part of this signature's settings.");
+				this->_componentBits[Index::value] = false;
+				return *this;
+			}
+
+			template<typename T>
+			SignatureStorage &toggleComponent() noexcept
+			{
+				using Index = typename Components::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Component not part of this signature's settings.");
+				this->_componentBits[Index::value] = !this->_componentBits[Index::value];
+				return *this;
+			}
+
+			template<typename T>
+			bool hasTag() const noexcept
+			{
+				using Index = typename Components::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Tag not part of this signature's settings.");
+				return this->_tagBits[Index::value];
+			}
+
+			template<typename T>
+			SignatureStorage &enableTag() noexcept
+			{
+				using Index = typename Tags::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Tag not part of this signature's settings.");
+				this->_tagBits[Index::value] = true;
+				return *this;
+			}
+
+			template<typename T>
+			SignatureStorage &disableTag() noexcept
+			{
+				using Index = typename Tags::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Tag not part of this signature's settings.");
+				this->_tagBits[Index::value] = false;
+				return *this;
+			}
+
+			template<typename T>
+			SignatureStorage &toggleTag() noexcept
+			{
+				using Index = typename Tags::template IndexOf<T>;
+				static_assert(el::is_same<typename Index::type, bool>::value,
+					"Tag not part of this signature's settings.");
+				this->_tagBits[Index::value] = !this->_tagBits[Index::value];
+				return *this;
+			}
+
+			auto &componentBits() noexcept
+			{
+				return this->_componentBits;
+			}
+
+			auto const &componentBits() const noexcept
+			{
+				return this->_componentBits;
+			}
+
+			auto &tagBits() noexcept
+			{
+				return this->_tagBits;
+			}
+
+			auto const &tagBits() const noexcept
+			{
+				return this->_tagBits;
+			}
+
+			bool matches(SignatureStorage<TSettings> const &rhs) const noexcept
+			{
+				return ((this->_componentBits & rhs._componentBits)
+					== this->_componentBits)
+				&& ((this->_tagBits & rhs._tagBits) == this->_tagBits);
+			}
+
 		private:
-			std::bitset<Components::size> _componentSig;
-			std::bitset<Tags::size> _tagSig;
-
-			template<std::size_t ...CIdxs, std::size_t ...TIdxs>
-			SignatureStorage(std::index_sequence<CIdxs...>, std::index_sequence<TIdxs...>):
-			_componentSig()
-			{
-			}
+			std::bitset<Components::size>	_componentBits;
+			std::bitset<Tags::size>		_tagBits;
 		};
 
-		template<typename TList, typename TSettings>
+		template<typename TSettings, typename TComponents, typename TTags>
 		class Signature {
 		public:
 			using Settings = TSettings;
 			using Components = typename Settings::Components;
 			using Tags = typename Settings::Tags;
-			constexpr Signature() = default;
 
-			constexpr static std::size_t componentsCount() {
+			constexpr Signature(): Signature(
+				std::make_index_sequence<Components::size>(),
+				std::make_index_sequence<Tags::size>()
+			)
+			{
+			}
+
+			constexpr static std::size_t componentsCount()
+			{
 				return Components::size;
 			}
 
-			constexpr static std::size_t tagsCount() {
+			constexpr static std::size_t tagsCount()
+			{
 				return Tags::size;
 			}
 
-			// bool compare(Bitset const &othPrint) const
-			// {
-			// 	return (this->_print & othPrint) == this->_print;
-			// }
+			bool compare(SignatureStorage<TSettings> const &othPrint) const
+			{
+				return this->_sto.matches(othPrint);
+			}
 		private:
-			// Bitset _print;
+			SignatureStorage<Settings> _sto;
+
+			template<std::size_t ...CIdxs, std::size_t ...TIdxs>
+			Signature(std::index_sequence<CIdxs...>, std::index_sequence<TIdxs...>):
+			_sto(
+				(char[]){
+					el::conditional<
+						TComponents::template Contains<
+							Components::template At<CIdxs>
+						>::value,
+						el::char_c<'0'>, el::char_c<'1'>
+					>::type::value...
+				},
+				(char[]){
+					el::conditional<
+						TComponents::template Contains<
+							Components::template At<TIdxs>
+						>::value,
+						el::char_c<'0'>, el::char_c<'1'>
+					>::type::value...
+				}
+			)
+			{
+			}
 		};
+
+		template<typename TSettings>
+		struct SignatureConcept {
+			using Settings = TSettings;
+			constexpr SignatureConcept() = default;
+
+			constexpr static auto canCompare = el::is_valid([](auto &&sig) -> bool {
+				return sig.compare(SignatureStorage<Settings>{});
+			});
+
+			template<typename TSig>
+			constexpr auto operator()(TSig &&sig) {
+				return canCompare(sig);
+			}
+		};
+
+		template<typename TSettings>
+		constexpr static ecs::SignatureConcept<TSettings> isSigFunctor{};
+
+		template<typename TSettings, typename TSig>
+		constexpr auto isSignature(TSig &&sig) noexcept {
+			return isSigFunctor<TSettings>(std::forward<TSig>(sig));
+		}
 
 		template<typename ...TSigs>
 		class SignatureAnd {
