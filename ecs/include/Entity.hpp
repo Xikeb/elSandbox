@@ -8,22 +8,26 @@
 #ifndef ENTITY_H_
 	#define ENTITY_H_
 	#include <bitset>
+	#include "Signature.hpp"
 
-	template<typename TSettings>
-	class Entity {
-	public:
-		using Components = TSettings::Components;
-		using Tags = TSettings::Tags;
-		Entity();
-		virtual ~Entity();
+	namespace ecs {
+		template<typename TSettings>
+		class Entity {
+		public:
+			using Settings = TSettings;
+			using Components = typename Settings::Components;
+			using Tags = typename Settings::Tags;
+			Entity();
+			virtual ~Entity();
 
-		template<typename TSignature>
-		bool matchesSignature(void)
-		{
-			return TSignature::compare()
-		}
-	private:
+			template<typename TSignature>
+			bool matchesSignature(TSignature&& sig = TSignature())
+			{
+				return sig.compare(this->_signature);
+			}
+		private:
 
-		SignatureBitset	signature;
-	};
+			SignatureStorage<Settings> _signature;
+		};
+	} // ecs
 #endif /* ENTITY_H_ */
