@@ -1,0 +1,157 @@
+src/main.cpp:6:21: error: expected ‘)’ before ‘;’ token
+   Vector2i(int x = 0; int y = 0): x(x), y(y) {}
+                     ^
+src/main.cpp:6:31: error: expected ‘;’ at end of member declaration
+   Vector2i(int x = 0; int y = 0): x(x), y(y) {}
+                               ^
+src/main.cpp:6:32: error: expected unqualified-id before ‘)’ token
+   Vector2i(int x = 0; int y = 0): x(x), y(y) {}
+                                ^
+src/main.cpp:8:7: error: redeclaration of ‘int test::Vector2i::y’
+   int y;
+       ^
+src/main.cpp:6:31: note: previous declaration ‘int test::Vector2i::y’
+   Vector2i(int x = 0; int y = 0): x(x), y(y) {}
+                               ^
+src/main.cpp:12:21: error: expected ‘)’ before ‘;’ token
+   Vector3i(int x = 0; int y = 0, int z = 0): x(x), y(y), z(z) {}
+                     ^
+src/main.cpp:12:34: error: expected unqualified-id before ‘int’
+   Vector3i(int x = 0; int y = 0, int z = 0): x(x), y(y), z(z) {}
+                                  ^
+src/main.cpp:14:7: error: redeclaration of ‘int test::Vector3i::y’
+   int y;
+       ^
+src/main.cpp:12:31: note: previous declaration ‘int test::Vector3i::y’
+   Vector3i(int x = 0; int y = 0, int z = 0): x(x), y(y), z(z) {}
+                               ^
+src/main.cpp:19:23: error: expected ‘)’ before ‘;’ token
+   Vector2f(float x = 0; float y = 0): x(x), y(y) {}
+                       ^
+src/main.cpp:19:35: error: expected ‘;’ at end of member declaration
+   Vector2f(float x = 0; float y = 0): x(x), y(y) {}
+                                   ^
+src/main.cpp:19:36: error: expected unqualified-id before ‘)’ token
+   Vector2f(float x = 0; float y = 0): x(x), y(y) {}
+                                    ^
+src/main.cpp:21:9: error: redeclaration of ‘float test::Vector2f::y’
+   float y;
+         ^
+src/main.cpp:19:35: note: previous declaration ‘float test::Vector2f::y’
+   Vector2f(float x = 0; float y = 0): x(x), y(y) {}
+                                   ^
+src/main.cpp:25:23: error: expected ‘)’ before ‘;’ token
+   Vector3f(float x = 0; float y = 0, float z = 0): x(x), y(y), z(z) {}
+                       ^
+src/main.cpp:25:38: error: expected unqualified-id before ‘float’
+   Vector3f(float x = 0; float y = 0, float z = 0): x(x), y(y), z(z) {}
+                                      ^
+src/main.cpp:27:9: error: redeclaration of ‘float test::Vector3f::y’
+   float y;
+         ^
+src/main.cpp:25:35: note: previous declaration ‘float test::Vector3f::y’
+   Vector3f(float x = 0; float y = 0, float z = 0): x(x), y(y), z(z) {}
+                                   ^
+In file included from ./include/Manager.hpp:17:0,
+                 from src/main.cpp:1:
+../el/type_list/type_list.hpp: In instantiation of ‘struct el::impl::Rename<ecs::Manager<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >::ComponentStorage, el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable> >’:
+../el/type_list/type_list.hpp:184:66:   required by substitution of ‘template<template<class ...> class Apply, class ... Types> using Rename = typename el::impl::Rename<Apply, Types ...>::Type [with Apply = ecs::Manager<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >::ComponentStorage; Types = {ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >::ComponentList}]’
+./include/Manager.hpp:355:48:   required from ‘class ecs::Manager<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >’
+src/main.cpp:61:31:   required from here
+../el/type_list/type_list.hpp:180:33: error: wrong number of template arguments (7, should be 1)
+     using Type = Apply<Types...>;
+                                 ^
+In file included from src/main.cpp:1:0:
+./include/Manager.hpp:351:55: note: provided for ‘template<class TSettings> template<class T> using ComponentStorage = std::tuple<std::vector<T, std::allocator<_Tp1> > >’
+    using ComponentStorage = std::tuple<std::vector<T>>;
+                                                       ^
+src/main.cpp: In function ‘int main()’:
+src/main.cpp:63:29: error: ‘void e’ has incomplete type
+   auto e = mgr.createEntity();
+                             ^
+src/main.cpp:64:18: error: ‘Vector2f’ was not declared in this scope
+   e.addComponent<Vector2f>(5, 5);
+                  ^
+src/main.cpp:64:18: note: suggested alternative:
+src/main.cpp:18:9: note:   ‘test::Vector2f’
+  struct Vector2f {
+         ^
+src/main.cpp:64:31: error: left operand of comma operator has no effect [-Werror=unused-value]
+   e.addComponent<Vector2f>(5, 5);
+                               ^
+In file included from src/main.cpp:1:0:
+./include/Manager.hpp: In instantiation of ‘void ecs::Manager<TSettings>::createEntity() [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >]’:
+src/main.cpp:63:29:   required from here
+./include/Manager.hpp:225:75: error: return-statement with a value, in function returning 'void' [-fpermissive]
+     return Handle(*this, this->_size, this->_handleData[this->_size].phase);
+                                                                           ^
+./include/Manager.hpp: In instantiation of ‘void ecs::Manager<TSettings>::enlarge(std::size_t) [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >; std::size_t = long unsigned int]’:
+./include/Manager.hpp:223:6:   required from ‘void ecs::Manager<TSettings>::createEntity() [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >]’
+src/main.cpp:63:29:   required from here
+./include/Manager.hpp:207:5: error: ‘class ecs::Manager<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >’ has no member named ‘_componentStorage’
+     for (auto &&sto: this->_componentStorage)
+     ^
+./include/Manager.hpp:210:6: error: no matching function for call to ‘operator new(sizetype, __gnu_cxx::__alloc_traits<std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > > >::value_type&)’
+      new (entitiesSto[hdIdx]) Entity(hdIdx, hdIdx);
+      ^
+In file included from /usr/include/c++/5/functional:54:0,
+                 from ./include/Manager.hpp:11,
+                 from src/main.cpp:1:
+/usr/include/c++/5/new:111:7: note: candidate: void* operator new(std::size_t)
+ void* operator new(std::size_t) _GLIBCXX_THROW (std::bad_alloc)
+       ^
+/usr/include/c++/5/new:111:7: note:   candidate expects 1 argument, 2 provided
+/usr/include/c++/5/new:119:7: note: candidate: void* operator new(std::size_t, const std::nothrow_t&)
+ void* operator new(std::size_t, const std::nothrow_t&) _GLIBCXX_USE_NOEXCEPT
+       ^
+/usr/include/c++/5/new:119:7: note:   no known conversion for argument 2 from ‘__gnu_cxx::__alloc_traits<std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > > >::value_type {aka ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >}’ to ‘const std::nothrow_t&’
+/usr/include/c++/5/new:129:14: note: candidate: void* operator new(std::size_t, void*)
+ inline void* operator new(std::size_t, void* __p) _GLIBCXX_USE_NOEXCEPT
+              ^
+/usr/include/c++/5/new:129:14: note:   no known conversion for argument 2 from ‘__gnu_cxx::__alloc_traits<std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > > >::value_type {aka ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >}’ to ‘void*’
+In file included from /usr/include/c++/5/vector:62:0,
+                 from ./include/Manager.hpp:13,
+                 from src/main.cpp:1:
+/usr/include/c++/5/bits/stl_construct.h: In instantiation of ‘void std::_Construct(_T1*, _Args&& ...) [with _T1 = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >; _Args = {}]’:
+/usr/include/c++/5/bits/stl_uninitialized.h:519:18:   required from ‘static _ForwardIterator std::__uninitialized_default_n_1<_TrivialValueType>::__uninit_default_n(_ForwardIterator, _Size) [with _ForwardIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _Size = long unsigned int; bool _TrivialValueType = false]’
+/usr/include/c++/5/bits/stl_uninitialized.h:575:20:   required from ‘_ForwardIterator std::__uninitialized_default_n(_ForwardIterator, _Size) [with _ForwardIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _Size = long unsigned int]’
+/usr/include/c++/5/bits/stl_uninitialized.h:637:44:   required from ‘_ForwardIterator std::__uninitialized_default_n_a(_ForwardIterator, _Size, std::allocator<_Tp>&) [with _ForwardIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _Size = long unsigned int; _Tp = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >]’
+/usr/include/c++/5/bits/vector.tcc:549:35:   required from ‘void std::vector<_Tp, _Alloc>::_M_default_append(std::vector<_Tp, _Alloc>::size_type) [with _Tp = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >; _Alloc = std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > >; std::vector<_Tp, _Alloc>::size_type = long unsigned int]’
+/usr/include/c++/5/bits/stl_vector.h:676:21:   required from ‘void std::vector<_Tp, _Alloc>::resize(std::vector<_Tp, _Alloc>::size_type) [with _Tp = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >; _Alloc = std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > >; std::vector<_Tp, _Alloc>::size_type = long unsigned int]’
+./include/Manager.hpp:205:5:   required from ‘void ecs::Manager<TSettings>::enlarge(std::size_t) [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >; std::size_t = long unsigned int]’
+./include/Manager.hpp:223:6:   required from ‘void ecs::Manager<TSettings>::createEntity() [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >]’
+src/main.cpp:63:29:   required from here
+/usr/include/c++/5/bits/stl_construct.h:75:7: error: no matching function for call to ‘ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >::Entity()’
+     { ::new(static_cast<void*>(__p)) _T1(std::forward<_Args>(__args)...); }
+       ^
+In file included from ./include/Manager.hpp:19:0,
+                 from src/main.cpp:1:
+./include/Entity.hpp:34:4: note: candidate: ecs::Entity<TSettings>::Entity(ecs::Entity<TSettings>&&) [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >]
+    Entity(Entity &&oth)
+    ^
+./include/Entity.hpp:34:4: note:   candidate expects 1 argument, 0 provided
+./include/Entity.hpp:28:4: note: candidate: ecs::Entity<TSettings>::Entity(const ecs::Entity<TSettings>&) [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >]
+    Entity(Entity const &oth):
+    ^
+./include/Entity.hpp:28:4: note:   candidate expects 1 argument, 0 provided
+./include/Entity.hpp:22:4: note: candidate: ecs::Entity<TSettings>::Entity(ecs::EntityIdx, ecs::HandleDataIdx) [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >; ecs::EntityIdx = long unsigned int; ecs::HandleDataIdx = long unsigned int]
+    Entity(ecs::EntityIdx eid, HandleDataIdx hdIndex):
+    ^
+./include/Entity.hpp:22:4: note:   candidate expects 2 arguments, 0 provided
+./include/Entity.hpp: In instantiation of ‘ecs::Entity<TSettings>::Entity(const ecs::Entity<TSettings>&) [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >]’:
+/usr/include/c++/5/bits/stl_construct.h:75:7:   required from ‘void std::_Construct(_T1*, _Args&& ...) [with _T1 = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >; _Args = {ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >&}]’
+/usr/include/c++/5/bits/stl_uninitialized.h:75:18:   required from ‘static _ForwardIterator std::__uninitialized_copy<_TrivialValueTypes>::__uninit_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _ForwardIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; bool _TrivialValueTypes = false]’
+/usr/include/c++/5/bits/stl_uninitialized.h:126:15:   required from ‘_ForwardIterator std::uninitialized_copy(_InputIterator, _InputIterator, _ForwardIterator) [with _InputIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _ForwardIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*]’
+/usr/include/c++/5/bits/stl_uninitialized.h:281:37:   required from ‘_ForwardIterator std::__uninitialized_copy_a(_InputIterator, _InputIterator, _ForwardIterator, std::allocator<_Tp>&) [with _InputIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _ForwardIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _Tp = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >]’
+/usr/include/c++/5/bits/stl_uninitialized.h:303:2:   required from ‘_ForwardIterator std::__uninitialized_move_if_noexcept_a(_InputIterator, _InputIterator, _ForwardIterator, _Allocator&) [with _InputIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _ForwardIterator = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >*; _Allocator = std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > >]’
+/usr/include/c++/5/bits/vector.tcc:563:7:   required from ‘void std::vector<_Tp, _Alloc>::_M_default_append(std::vector<_Tp, _Alloc>::size_type) [with _Tp = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >; _Alloc = std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > >; std::vector<_Tp, _Alloc>::size_type = long unsigned int]’
+/usr/include/c++/5/bits/stl_vector.h:676:21:   required from ‘void std::vector<_Tp, _Alloc>::resize(std::vector<_Tp, _Alloc>::size_type) [with _Tp = ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >; _Alloc = std::allocator<ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > > >; std::vector<_Tp, _Alloc>::size_type = long unsigned int]’
+./include/Manager.hpp:205:5:   required from ‘void ecs::Manager<TSettings>::enlarge(std::size_t) [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >; std::size_t = long unsigned int]’
+./include/Manager.hpp:223:6:   required from ‘void ecs::Manager<TSettings>::createEntity() [with TSettings = ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> >]’
+src/main.cpp:63:29:   required from here
+./include/Entity.hpp:30:49: error: ‘const class ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >’ has no member named ‘_hdIndex’
+    _alive(oth._inUse), _signature(oth._signature)
+                                                 ^
+./include/Entity.hpp:30:49: error: ‘const class ecs::Entity<ecs::Settings<el::type_list<test::Vector2f, test::Vector3f, test::Vector2i, test::Vector3i, test::Transform, test::Color, test::Drawable>, el::type_list<test::Inverted> > >’ has no member named ‘_inUse’
+cc1plus: all warnings being treated as errors
+make: *** [src/main.o] Erreur 1
