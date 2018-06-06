@@ -7,7 +7,6 @@
 			template<typename T>
 			constexpr int exists(int = 0) noexcept;
 
-			template<typename T>
 			constexpr void exists(...);
 		} // impl
 		namespace detail {

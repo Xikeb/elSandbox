@@ -6,7 +6,7 @@
  */
 
 #include "EntityHandle.hpp"
-
+/*
 EntityHandle::EntityHandle()
 {
 	// TODO Auto-generated constructor stub
@@ -18,3 +18,4 @@ EntityHandle::~EntityHandle()
 	// TODO Auto-generated destructor stub
 }
 
+*/

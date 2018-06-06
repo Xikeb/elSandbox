@@ -1,0 +1,35 @@
+el/types/map.cpp: In instantiation of ‘constexpr auto el::impl::replace_key(el::Type_c<el::map<Pairs ...> >, el::Type_c<el::map<el::pair<HKey, HValue>, el::pair<Keys, Values>...> >, el::Type_c<T>, el::Type_c<el::pair<HKey, HValue> >) [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Pairs = {el::pair<el::integral_c<int, 0>, el::integral_c<bool, true> >}; HKey = el::integral_c<int, 1>; HValue = el::integral_c<bool, false>; Keys = {}; Values = {}]’:
+el/types/map.cpp:92:28:   required from ‘constexpr auto el::impl::replace_key(el::Type_c<el::map<Pairs ...> >, el::Type_c<el::map<el::pair<HKey, HValue>, el::pair<Keys, Values>...> >, el::Type_c<T>, el::Type_c<el::pair<HKey, HValue> >) [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Pairs = {}; HKey = el::integral_c<int, 0>; HValue = el::integral_c<bool, true>; Keys = {el::integral_c<int, 1>}; Values = {el::integral_c<bool, false>}]’
+el/types/map.cpp:145:26:   required by substitution of ‘template<class ... Keys, class ... Values> template<class Key, class NKey, class NValue> using ReplacePair = el::type_of<decltype (el::impl::replace_key(type_c<el::map<> >, type_c<el::map<el::pair<Keys, Values>...> >, type_c<Key>, type_c<el::pair<NKey, NValue> >))> [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Keys = {el::integral_c<int, 0>, el::integral_c<int, 1>}; Values = {el::integral_c<bool, true>, el::integral_c<bool, false>}]’
+el/types/map.cpp:163:43:   required from ‘constexpr auto el::map<el::pair<Keys, Values>...>::replace_pair(el::Type_c<U>, el::Type_c<el::pair<NKey, NValue> >) [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Keys = {el::integral_c<int, 0>, el::integral_c<int, 1>}; Values = {el::integral_c<bool, true>, el::integral_c<bool, false>}]’
+el/types/map.cpp:197:3:   required from here
+el/types/map.cpp:92:28: error: no matching function for call to ‘replace_key(const el::Type_c<el::map<el::pair<el::integral_c<int, 0>, el::integral_c<bool, true> >, el::pair<el::integral_c<int, 1>, el::integral_c<bool, false> > > >&, const el::Type_c<el::map<> >&, el::Type_c<el::integral_c<int, 0> >&, el::Type_c<el::pair<el::integral_c<short int, 9>, el::integral_c<short int, 10> > >&)’
+     : el::impl::replace_key(
+                            ^
+el/types/map.cpp:80:19: note: candidate: template<class Key, class NKey, class NValue, class ... Pairs, class HKey, class HValue, class ... Keys, class ... Values> constexpr auto el::impl::replace_key(el::Type_c<el::map<Pairs ...> >, el::Type_c<el::map<el::pair<HKey, HValue>, el::pair<Keys, Values>...> >, el::Type_c<T>, el::Type_c<el::pair<HKey, HValue> >)
+    constexpr auto replace_key(
+                   ^
+el/types/map.cpp:80:19: note:   template argument deduction/substitution failed:
+el/types/map.cpp:92:28: note:   candidate expects 2 arguments, 0 provided
+     : el::impl::replace_key(
+                            ^
+el/types/map.cpp:92:28: note:   ‘el::Type_c<el::map<> >’ is not derived from ‘el::Type_c<el::map<el::pair<HKey, HValue>, el::pair<Keys, Values>...> >’
+el/types/map.cpp: In instantiation of ‘constexpr auto el::impl::replace_key(el::Type_c<el::map<Pairs ...> >, el::Type_c<el::map<el::pair<HKey, HValue>, el::pair<Keys, Values>...> >, el::Type_c<T>, el::Type_c<el::pair<HKey, HValue> >) [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Pairs = {}; HKey = el::integral_c<int, 0>; HValue = el::integral_c<bool, true>; Keys = {el::integral_c<int, 1>}; Values = {el::integral_c<bool, false>}]’:
+el/types/map.cpp:145:26:   required by substitution of ‘template<class ... Keys, class ... Values> template<class Key, class NKey, class NValue> using ReplacePair = el::type_of<decltype (el::impl::replace_key(type_c<el::map<> >, type_c<el::map<el::pair<Keys, Values>...> >, type_c<Key>, type_c<el::pair<NKey, NValue> >))> [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Keys = {el::integral_c<int, 0>, el::integral_c<int, 1>}; Values = {el::integral_c<bool, true>, el::integral_c<bool, false>}]’
+el/types/map.cpp:163:43:   required from ‘constexpr auto el::map<el::pair<Keys, Values>...>::replace_pair(el::Type_c<U>, el::Type_c<el::pair<NKey, NValue> >) [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Keys = {el::integral_c<int, 0>, el::integral_c<int, 1>}; Values = {el::integral_c<bool, true>, el::integral_c<bool, false>}]’
+el/types/map.cpp:197:3:   required from here
+el/types/map.cpp:87:5: error: third operand to the conditional operator is of type ‘void’, but the second operand is neither a throw-expression nor of type ‘void’
+     ? el::type_c<el::map<
+     ^
+In file included from el/types/map.cpp:8:0:
+./el/types/type_c.hpp: In substitution of ‘template<class T> using type_of = typename T::type [with T = void]’:
+el/types/map.cpp:152:6:   required by substitution of ‘template<class ... Keys, class ... Values> template<class Key, class NKey, class NValue> using ReplacePair = el::type_of<decltype (el::impl::replace_key(type_c<el::map<> >, type_c<el::map<el::pair<Keys, Values>...> >, type_c<Key>, type_c<el::pair<NKey, NValue> >))> [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Keys = {el::integral_c<int, 0>, el::integral_c<int, 1>}; Values = {el::integral_c<bool, true>, el::integral_c<bool, false>}]’
+el/types/map.cpp:163:43:   required from ‘constexpr auto el::map<el::pair<Keys, Values>...>::replace_pair(el::Type_c<U>, el::Type_c<el::pair<NKey, NValue> >) [with Key = el::integral_c<int, 0>; NKey = el::integral_c<short int, 9>; NValue = el::integral_c<short int, 10>; Keys = {el::integral_c<int, 0>, el::integral_c<int, 1>}; Values = {el::integral_c<bool, true>, el::integral_c<bool, false>}]’
+el/types/map.cpp:197:3:   required from here
+./el/types/type_c.hpp:66:35: error: ‘void’ is not a class, struct, or union type
+   using type_of = typename T::type;
+                                   ^
+el/types/map.cpp: In function ‘int main(int, char**)’:
+el/types/map.cpp:197:4: error: invalid use of void expression
+   ));
+    ^

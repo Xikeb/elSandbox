@@ -7,7 +7,7 @@
 
 NAME		=	ecs
 
-CXX		=	g++
+CXX		=	g++ -std=c++1y
 
 RM		=	rm -f
 
@@ -15,6 +15,7 @@ SRCSDIR		=	./src
 
 SRCS		=	./src/Entity.cpp	\
 			./src/EntityHandle.cpp	\
+			./src/main.cpp		\
 			./src/Manager.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)

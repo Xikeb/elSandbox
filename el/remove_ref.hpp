@@ -5,7 +5,7 @@ namespace el {
 	template <typename T> struct remove_ref;
 
 	template <typename T>
-	using remove_ref_t = typename remove_ref<T>::type;
+	using remove_ref_t = typename el::remove_ref<T>::type;
 	
 	template <typename T>
 	struct remove_ref {

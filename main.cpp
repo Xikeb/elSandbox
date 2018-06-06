@@ -3,6 +3,9 @@
 #include "el/type_list/type_list.hpp"
 #include "el/type_list/includes.hpp"
 #include "el/detail/and.hpp"
+#include "el/types/is_valid.hpp"
+#include "el/types/type_c.hpp"
+#include "el/remove_cv.hpp"
 using namespace std;
 
 using Likes = el::type_list<
@@ -10,37 +13,12 @@ using Likes = el::type_list<
 	short
 >;
 
+using Loves = el::type_list<int>;
+
+#include <iostream>
 template<typename T>
 void pretty_print(T t __attribute__((unused))) {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
-}
-
-namespace impl {
-	template<typename TF, typename ...Args, typename = decltype(
-		std::declval<TF>()(std::declval<Args>()...)
-	)>
-	constexpr auto is_valid(int) noexcept {
-		return el::true_c{};
-	}
-
-	template<typename TF, typename ...Args>
-	constexpr auto is_valid(...) noexcept {
-		return el::false_c{};
-	}
-
-	template<typename TF>
-	struct is_valid_functor {
-		template<typename ...Args>
-		constexpr auto operator()(Args&&...) const noexcept {
-			return impl::is_valid<TF, Args...>();
-		}
-	};
-} // impl
-
-template<typename TF>
-constexpr auto is_valid(TF&&) noexcept
-{
-	return impl::is_valid_functor<TF>();
 }
 
 struct Has {
@@ -55,7 +33,12 @@ struct Doesnt {
 
 };
 
-int main()
+template<typename T>
+using IsInt = typename Loves::template Contains<T>;
+
+using NewList = typename Likes::template Filter<IsInt>;
+
+int utests_elMeta()
 {
 	pretty_print(el::type_list<void>{ });
 	pretty_print(el::Rename<std::tuple, Likes>{ });
@@ -94,7 +77,25 @@ int main()
 	cout << endl;
 
 	cout << "<is_valid> test:\t";
-	auto canSay = is_valid([](auto &&me) { return me.say(6); });
-	pretty_print(canSay(Doesnt{ }));
+	auto canSay = el::is_valid([](auto &&me) { return me.say(6); });
+	pretty_print(canSay(Has{ }));
+
+	cout << endl << endl;
+
+	const int c = 0;
+	volatile int v = 0;
+	const int &cr = c;
+	volatile int &vr = v;
+	pretty_print(el::type_c<decltype(c)>); pretty_print(el::type_c<decltype(v)>);
+	pretty_print(el::type_c<decltype(cr)>); pretty_print(el::type_c<decltype(vr)>);
+	cout << endl;
+	pretty_print(el::type_c<el::remove_const_t<decltype(c)>>); pretty_print(el::type_c<remove_volatile_t<decltype(v)>>);
+	pretty_print(el::type_c<el::remove_cvref_t<decltype(cr)>>); pretty_print(el::type_c<decltype(vr)>);
+
+	cout << "New List: "; pretty_print(NewList{});
 	return 0;
+}
+
+int main() {
+	return utests_elMeta();
 }

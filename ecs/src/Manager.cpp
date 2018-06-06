@@ -6,10 +6,10 @@
  */
 
 #include "Manager.hpp"
-
+/*
 Manager::Manager()
 {
-	// TODO Auto-generated constructor stub
+	this->enlarge(100)
 
 }
 
@@ -19,9 +19,4 @@ Manager::~Manager()
 }
 
 Manager::enlarge(std::size_t addition)
-{
-	addition = (1 + addition % 128) * 128;
-	for (auto &&sto: this->_componentStorage)
-		sto.reserve(this->_capacity + addition);
-	this->_capacity += addition;
-}
+*/
