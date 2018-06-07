@@ -31,6 +31,14 @@
 			{
 				return contains<T>(el::type_c<el::type_list<TRest...>>, 0);
 			}
+
+			template<typename List, typename T>
+			struct Contains;
+
+			template<typename ...Types, typename T>
+			struct Contains<el::type_list<Types...>, T>: type_of<decltype(el::impl::contains<T>(el::type_c<el::type_list<Types...>>, 0))> {
+				using List = el::type_list<Types...>;
+			};
 		} // impl
 	} // el
 #endif // ELMETA_CONTAINS_HPP

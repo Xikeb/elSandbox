@@ -33,6 +33,12 @@
 				return this->_mgr;
 			}
 
+			void kill() noexcept
+			{
+				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+				this->_mgr.getEntity(this->_dataIdx).kill();
+			}
+
 			template<typename T>
 			bool hasComponent() noexcept
 			{
@@ -50,7 +56,7 @@
 				auto dataIdx = this->_dataIdx;
 
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-				return mgr.getComponent<T>(dataIdx);
+				return mgr.template getComponent<T>(dataIdx);
 			}
 
 			template<typename T, typename ...Args>
@@ -70,7 +76,7 @@
 				auto dataIdx = this->_dataIdx;
 
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-				mgr.removeComponent<T>(dataIdx);
+				mgr.template removeComponent<T>(dataIdx);
 			}
 
 			template<typename T>

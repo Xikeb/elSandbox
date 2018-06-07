@@ -52,15 +52,25 @@
 
 			constexpr static std::size_t size = 1 + sizeof...(TRest);
 
-			/*template<typename TElem>
-			using Contains = typename el::conditional<
-				el::is_same<Current, TElem>::value,
-				el::true_c,
-				typename Next::template Contains<TElem>
-			>::type;*/
-
 			template<typename T>
-			using Contains = type_of<decltype(el::impl::contains<T>(el::type_c<This>, 0))>;
+			struct Contains: type_of<decltype(el::impl::contains<T>(el::type_c<This>, 0))> {
+			};
+
+			struct Has {
+				constexpr Has() = default;
+				template<typename T>
+				constexpr auto operator()() const noexcept
+				{
+					return type_of<decltype(el::impl::contains<T>(el::type_c<This>, 0))>();
+				}
+				template<typename T>
+				constexpr auto operator()(el::Type_c<T>) const noexcept
+				{
+					return type_of<decltype(el::impl::contains<T>(el::type_c<This>, 0))>();
+				}
+			};
+
+			constexpr static Has has{};
 
 			template<typename TElem, std::size_t TPos = 0>
 			using IndexOf = typename el::conditional<
@@ -76,7 +86,16 @@
 			template<typename T>
 			using Unshift = el::type_list<THead, TRest..., T>;
 
-			template<template<typename> class Cond>
+			template<typename Cond>
+			constexpr auto filter(Cond&& c) {
+				return el::impl::filter(
+					el::type_c<el::type_list<>>,
+					el::type_c<This>,
+					std::forward<Cond>(c)
+				);
+			}
+
+			template<typename Cond>
 			using Filter = el::type_of<decltype(el::impl::filter<Cond>(
 				el::type_c<el::type_list<>>,
 				el::type_c<This>

@@ -188,7 +188,7 @@
 
 			Manager()
 			{
-				this->enlarge(100);
+				this->enlarge(1000);
 
 			}
 
@@ -260,7 +260,7 @@
 				auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 				assert(e.alive());
-				return e.hasComponent<T>();
+				return e.template hasComponent<T>();
 			}
 
 			template<typename T>
@@ -282,7 +282,7 @@
 				assert(e.alive());
 				auto &c = std::get<componentId<T>>(this->_componentStorage)[e.eid];
 				new (&c) T(std::forward<Args>(args)...);
-				e.addComponent<T>();
+				e.template addComponent<T>();
 				return c;
 			}
 
@@ -292,7 +292,7 @@
 				auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 				assert(e.alive());
-				e.removeComponent<T>();
+				e.template removeComponent<T>();
 			}
 
 			template<typename T>
@@ -301,7 +301,7 @@
 				auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 				assert(e.alive());
-				return e.hasTag<T>();
+				return e.template hasTag<T>();
 			}
 
 			template<typename T>
@@ -310,7 +310,7 @@
 				auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 				assert(e.alive());
-				e.addTag<T>();
+				e.template addTag<T>();
 			}
 
 			template<typename T>
@@ -319,7 +319,7 @@
 				auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 				assert(e.alive());
-				e.removeTag<T>();
+				e.template removeTag<T>();
 			}
 
 			template<typename F, typename ...Args>

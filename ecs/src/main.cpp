@@ -56,40 +56,17 @@ namespace test {
 	struct Inverted;
 
 	using Components = ecs::ComponentList<
-		Vector2f, std::string/*, Vector3f, Vector2i, Vector3i,
-		Transform, Color, Drawable*/
+		Vector2f, std::string, Vector3f, Vector2i, Vector3i,
+		Transform, Color, Drawable
 	>;
 
 	using Tags = ecs::TagList<Inverted>;
 
 	using Settings = ecs::Settings<Components, Tags>;
 
-	using HasString = ecs::Signature<Settings::Basic, Vector2f>;
-	template<typename T>
-	using Choice = typename el::conditional<
-		el::impl::is_same<T, std::string>::Result::value,
-		el::true_c,
-		el::false_c
-	>::type;
+	using HasString = ecs::Signature<Settings::Basic, std::string>;
 } // test
 using namespace test;
-
-
-/*
-		#include <type_traits>
-		namespace test {
-			using Components = el::type_list<float, double>;
-			using Tags = el::type_list<char>;
-			using Settings = ecs::Settings<Components, Tags>;
-			using IsLong = Settings::ComponentList::template Filter<el::type_list<double>::Contains>;
-			static IsLong sig{};
-			(void)sig;
-		} // test
-		using namespace test;
-		int main() {
-			pretty_print(el::type_of<decltype(el::impl::contains<char>(el::type_c<el::type_list<char>>, 0))>{});
-		}
-*/
 
 int main()
 {
@@ -97,25 +74,33 @@ int main()
 	Manager mgr;
 
 	cout << boolalpha;
-	pretty_print(Manager::componentId<Transform>);
-	for (int i = 0; i < 100; ++i) {
+	//pretty_print(Manager::componentId<Transform>);
+	for (int i = 0; i < 10; ++i) {
 		auto e = mgr.createEntity();
 		e.template addComponent<Vector2f>(5, 5);
 		e.template addTag<Inverted>();
 		e.template addComponent<std::string>("Hello");
-		//if (i % 2 == 0) {
+		//if (i % 2 == 0)
 		//	e.template removeComponent<Vector2f>();
-		//}
 		//if (i % 3 == 0)
 		//	e.template removeTag<Inverted>();
 	}
 	mgr.forEntitiesMatching(HasString(), [](auto &e) {
 		e.template getComponent<std::string>() = "World";
 	});
-	mgr.forEntitiesMatching(HasString(), [&](auto &e, std::string const &intro) {
-		cout << intro << ": " << e.template getComponent<std::string>() << endl;
-		cout << e.template hasComponent<Vector2f>() << " " << e.template hasTag<Inverted>() << e.template getComponent<std::string>() << endl;
+	std::size_t idx = 0;
+	mgr.forEntities([&](auto &e, size_t &idx) {
+		e.template removeTag<Inverted>();
+		if (idx % 2 == 1)
+			e.kill();
+		++idx;
+	}, idx);
+	mgr.forEntitiesMatching(HasString(), [&](auto &e, std::string const &) {
+		//cout << intro << ": " << e.template getComponent<std::string>() << endl;
+		cout << e.template hasComponent<Vector2f>()
+			<< " " << e.template hasTag<Inverted>()
+			<< " " << e.template getComponent<std::string>()
+		<< endl;
 	}, "I say");
-	pretty_print(test::Choice<std::string>{});
 	return 0;
 }

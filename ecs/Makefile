@@ -26,7 +26,7 @@ TESTSRCS	=	$(SRCS:.cpp=_test.cpp)
 TESTSRCS	=	$(patsubst $(SRCSDIR)/%.cpp, $(TESTSRCSDIR)/%_test.cpp, $(SRCS))
 TESTOBJS	=	$(TESTSRCS:.cpp=.o)
 
-CPPFLAGS	=	-I ./include/ -I../
+CPPFLAGS	=	-I ./include/ -I../ -DNDEBUG
 CPPFLAGS	+=	-W -Wall -Wextra -Werror
 
 all: debug

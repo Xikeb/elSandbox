@@ -162,12 +162,7 @@
 			using Tags = typename Types::template Filter<typename TagList::Contains>;
 			using Required = Types;
 
-			constexpr Signature()/*: Signature(
-				std::make_index_sequence<ComponentList::size>(),
-				std::make_index_sequence<TagList::size>()
-			)*/
-			{
-			}
+			constexpr Signature() = default;
 
 			constexpr static std::size_t componentCount = ComponentList::size;
 			constexpr static std::size_t tagCount = TagList::size;

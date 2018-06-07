@@ -3,10 +3,12 @@
 	#include <cstdlib>
 	#include <bitset>
 	#include <tuple>
+	#include <iostream>
 	#include "el/detail/and.hpp"
 	#include "Settings.hpp"
 	#include "el/type_list/type_list.hpp"
 	#include "el/types/is_valid.hpp"
+	#include "el/types/type_c.hpp"
 	
 	namespace ecs {
 		template<typename TSettings>
@@ -158,8 +160,8 @@
 			using ComponentList = typename Settings::ComponentList;
 			using TagList = typename Settings::TagList;
 			using Types = el::type_list<TTypes...>;
-			using Components = typename Types::template Filter<typename ComponentList::Contains>;
-			using Tags = typename Types::template Filter<typename TagList::Contains>;
+			using Components = el::type_of<decltype(ComponentList().filter(ComponentList::has))>;
+			using Tags = el::type_of<decltype(TagList().filter(TagList::has))>;
 			using Required = Types;
 
 			constexpr Signature()/*: Signature(
@@ -200,6 +202,11 @@
 			{
 			}*/
 		};
+
+		template<typename T>
+		void pretty_print(T t __attribute__((unused))) {
+			std::cout << __PRETTY_FUNCTION__ << std::endl;
+		}
 
 		namespace test {
 			using Components = el::type_list<float, double>;
