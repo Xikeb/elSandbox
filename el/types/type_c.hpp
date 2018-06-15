@@ -7,6 +7,7 @@
 		template<typename T>
 		struct Type_c {
 			using type = T;
+			using This = el::Type_c<type>;
 
 			constexpr Type_c() = default;
 
@@ -41,6 +42,11 @@
 			constexpr bool operator==(el::Type_c<U>&&)
 			{
 				return false;
+			}
+
+			auto operator+() const noexcept
+			{
+				return static_cast<This const &&>(*this);
 			}
 		};
 
