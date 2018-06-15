@@ -40,6 +40,12 @@
 
 			template<typename, std::size_t = 0>
 			using IndexOf = el::false_c;
+
+			template<typename TF, typename ...Args>
+			auto for_each(TF&& f, Args&&...)
+			{
+				return std::move(f);
+			}
 		};
 
 		template<typename THead, typename ...TRest>
@@ -118,7 +124,7 @@
 			template<typename TF, typename ...Args>
 			auto for_each(TF&& f, Args&&... args)
 			{
-				el::impl::for_each<This>(
+				return el::impl::for_each<This>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
 					std::forward<Args>(args)...
@@ -154,10 +160,10 @@
 		namespace impl {
 			template<typename std::size_t pos, typename List>
 			struct at_helper {
-				using Type = el::enable_if<
+				using Type = typename el::enable_if<
 					el::detail::exists<typename List::Next>::value,
 					typename el::impl::at_helper<pos - 1, typename List::Next>::Type
-				>;
+				>::type;
 			};
 
 			template<typename List>
