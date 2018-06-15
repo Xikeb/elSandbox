@@ -17,10 +17,41 @@
 		class EntityHandle {
 		public:
 			using Settings = TSettings;
+			using This = ecs::EntityHandle<TSettings>;
 
-			EntityHandle(ecs::Manager<Settings> &mgr, ecs::HandleDataIdx dataIdx, int phase):
-			_mgr(mgr), _dataIdx(dataIdx), _phase(phase)
+			explicit EntityHandle(ecs::Manager<Settings> &mgr) noexcept:
+			_mgr(mgr), _dataIdx(-1), _phase(-1)
 			{
+			}
+
+			EntityHandle(
+				ecs::Manager<Settings> &mgr,
+				ecs::HandleDataIdx dataIdx,
+				int phase
+			): _mgr(mgr), _dataIdx(dataIdx), _phase(phase)
+			{
+			}
+
+			EntityHandle(This &oth):
+			_mgr(oth._mgr), _dataIdx(oth._dataIdx),
+			_phase(oth._phase)
+			{
+			}
+
+			EntityHandle(This &&oth):
+			_mgr(oth._mgr), _dataIdx(oth._dataIdx),
+			_phase(oth._phase)
+			{
+			}
+
+			This &operator=(This const &oth) noexcept
+			{
+				return *(new (this) This(oth));
+			}
+
+			This &operator=(This &&oth) noexcept
+			{
+				return *(new (this) This(oth));
 			}
 
 			int getPhase() const noexcept
@@ -33,10 +64,36 @@
 				return this->_mgr;
 			}
 
+			bool isValid() const noexcept
+			{
+				return (this->_mgr.getHandleData\
+					(this->_dataIdx).phase == this->_phase);
+			}
+
 			void kill() noexcept
 			{
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
 				this->_mgr.getEntity(this->_dataIdx).kill();
+			}
+
+			template<typename TSignature>
+			bool matchesSignature(TSignature &&sig) const noexcept
+			{
+				auto &mgr = this->_mgr;
+				auto dataIdx = this->_dataIdx;
+
+				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+				return mgr.getEntity(dataIdx).matchesSignature(std::forward<TSignature>(sig));
+			}
+
+			template<typename TSignature>
+			bool matchesSignature() const noexcept
+			{
+				auto &mgr = this->_mgr;
+				auto dataIdx = this->_dataIdx;
+
+				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+				return mgr.getEntity(dataIdx).template matchesSignature<TSignature>();
 			}
 
 			template<typename T>
@@ -66,17 +123,19 @@
 				auto dataIdx = this->_dataIdx;
 
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-				return mgr.template addComponent<T>(dataIdx, std::forward<Args>(args)...);
+				mgr.template addComponent<T>(dataIdx, std::forward<Args>(args)...);
+				return *this;
 			}
 
 			template<typename T>
-			auto removeComponent() const noexcept
+			auto &removeComponent() const noexcept
 			{
 				auto &mgr = this->_mgr;
 				auto dataIdx = this->_dataIdx;
 
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
 				mgr.template removeComponent<T>(dataIdx);
+				return *this;
 			}
 
 			template<typename T>
@@ -90,23 +149,31 @@
 			}
 
 			template<typename T>
-			void addTag() noexcept
+			auto &addTag() noexcept
 			{
 				auto &mgr = this->_mgr;
 				auto dataIdx = this->_dataIdx;
 
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
 				mgr.template addTag<T>(dataIdx);
+				return *this;
 			}
 
 			template<typename T>
-			void removeTag() noexcept
+			auto &removeTag() noexcept
 			{
 				auto &mgr = this->_mgr;
 				auto dataIdx = this->_dataIdx;
 
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
 				mgr.template removeTag<T>(dataIdx);
+				return *this;
+			}
+
+			bool operator==(This const &oth)
+			{
+				return (&this->_mgr == &oth._mgr)
+				&& (this->_dataIdx == oth._dataIdx) && (this->_phase == oth._phase);
 			}
 
 		private:
