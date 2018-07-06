@@ -64,7 +64,7 @@ namespace test {
 
 	using Settings = ecs::Settings<Components, Tags>;
 
-	using HasString = ecs::Signature<Settings::Basic, std::string>;
+	using HasString = ecs::Signature<Settings::Basic, std::string, Inverted, Vector2i, Vector2f>;
 } // test
 using namespace test;
 

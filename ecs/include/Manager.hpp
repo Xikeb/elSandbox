@@ -81,7 +81,7 @@
 			template<typename ...Args>
 			void operator()(Args&&... args)
 			{
-				this->_mgr.forEntitiesMatching(this->sig, this->_f, std::forward<Args>(args)...);
+				this->_mgr.forEntitiesMatching(this->sig, this->_f, std::forward<Args>(args)..., this->inst);
 			}
 
 
@@ -158,6 +158,15 @@
 		};
 
 		struct HandleData {
+			HandleData()
+			{
+			}
+
+			HandleData(ecs::EntityIdx entPos, int phase = 0):
+			entityPosition(entPos), phase(phase)
+			{
+			}
+
 			ecs::EntityIdx entityPosition;
 			int phase;
 		};
@@ -189,7 +198,6 @@
 			Manager()
 			{
 				this->enlarge(1000);
-
 			}
 
 			ecs::HandleData const &getHandleData(ecs::HandleDataIdx hdIdx) noexcept
@@ -215,10 +223,8 @@
 				entitiesSto.reserve(nCapa);
 				hdSto.reserve(nCapa);
 				for (auto hdIdx = capa; hdIdx < nCapa; ++hdIdx) {
-					new (&entitiesSto[hdIdx]) Entity(hdIdx, hdIdx);
-					auto &hd = hdSto[hdIdx];
-					hd.entityPosition = hdIdx;
-					hd.phase = 0;
+					entitiesSto.emplace_back(hdIdx, hdIdx);
+					hdSto.emplace_back(hdIdx);
 				}
 				this->_capacity = nCapa;
 			}
@@ -229,8 +235,18 @@
 
 				if (size >= this->_capacity)
 					this->enlarge(size / 2);
+				auto h = Handle(*this, size, this->_handleData[size].phase);
 				++this->_size;
-				return Handle(*this, this->_size, this->_handleData[this->_size].phase);
+				return h;
+			}
+
+			void killEntity(ecs::HandleDataIdx dataIdx) noexcept
+			{
+				ComponentList().for_each([&](auto &e, auto &i) {
+					if (this->template hasComponent<typename decltype(+e)::type>(dataIdx))
+						this->template removeComponent<typename decltype(+e)::type>(dataIdx);
+				});
+				this->_entities[this->_handleData[dataIdx].entityPosition].kill();
 			}
 
 			void refresh() noexcept
@@ -242,16 +258,20 @@
 				while (itDead < itAlive) {
 					auto &d = this->_entities[itDead];
 					auto &a = this->_entities[itAlive];
-					for(; (itDead < itAlive) && !d->alive(); ++itDead);
-					for(; (itDead < itAlive) && a->alive(); ++itAlive);
-					if (!d->alive() && a->alive()) {
+					for(; d->alive(); ++itDead);
+					for(; !a->alive(); ++itAlive);
+					if (itDead < itAlive) {
+						auto &hdDead = hds[d.hdIndex];
+						auto &hdAlive = hds[a.hdIndex];
+
 						std::swap(d, a);
-						hds[d.hdIndex].entityPosition = itAlive;
-						++hds[d.hdIndex].phase;
-						hds[a.hdIndex].entityPosition = itDead;
-					}
+						hdDead.entityPosition = itAlive;
+						++hdAlive.phase;
+						hdAlive.entityPosition = itDead;
+					} else
+						break;
 				}
-				this->size = std::distance(itDead, std::begin(this->_entities));
+				this->size = itDead;
 			}
 
 			template<typename T>
@@ -293,6 +313,8 @@
 
 				assert(e.alive());
 				e.template removeComponent<T>();
+				auto &c = std::get<componentId<T>>(this->_componentStorage)[e.eid];
+				c.~T();
 			}
 
 			template<typename T>
