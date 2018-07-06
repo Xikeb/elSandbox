@@ -32,6 +32,20 @@
 		namespace detail {
 			template<bool ...values>
 			using _and = typename el::impl::_and<values...>::Result;
+
+			constexpr auto andf() {
+				return el::true_c{};
+			}
+
+			template<bool ...Values>
+			constexpr auto andf(el::integral_c<bool, true>, el::integral_c<bool, Values>... rest) {
+				return el::impl::andf(rest...);
+			}
+
+			template<bool ...Values>
+			constexpr auto andf(el::integral_c<bool, false>, el::integral_c<bool, Values>... rest) {
+				return el::false_c{};
+			}
 		} // detail
 	} // el
 #endif // ELMETA_AND_HPP
