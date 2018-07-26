@@ -26,14 +26,14 @@ TESTSRCS	=	$(SRCS:.cpp=_test.cpp)
 TESTSRCS	=	$(patsubst $(SRCSDIR)/%.cpp, $(TESTSRCSDIR)/%_test.cpp, $(SRCS))
 TESTOBJS	=	$(TESTSRCS:.cpp=.o)
 
-CPPFLAGS	=	-I ./include/ -I../ -DNDEBUG
+CPPFLAGS	=	-I ./include/ -I../ #-DNDEBUG
 CPPFLAGS	+=	-W -Wall -Wextra -Werror
 
 all: debug
 
 exec:	$(NAME)
 
-debug:	CPPFLAGS += -ggdb
+debug:	CPPFLAGS += -g3 -O0
 debug:	exec
 
 $(NAME): $(OBJS)

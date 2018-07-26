@@ -39,7 +39,7 @@
 
 			template<bool ...Values>
 			constexpr auto andf(el::integral_c<bool, true>, el::integral_c<bool, Values>... rest) {
-				return el::impl::andf(rest...);
+				return el::detail::andf(rest...);
 			}
 
 			template<bool ...Values>

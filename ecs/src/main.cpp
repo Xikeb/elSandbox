@@ -64,7 +64,7 @@ namespace test {
 
 	using Settings = ecs::Settings<Components, Tags>;
 
-	using HasString = ecs::Signature<Settings::Basic, std::string, Inverted, Vector2i, Vector2f>;
+	using HasString = ecs::Signature<Settings::Basic, std::string>;
 } // test
 using namespace test;
 
@@ -86,7 +86,7 @@ int main()
 		//	e.template removeTag<Inverted>();
 	}
 	mgr.forEntitiesMatching(HasString(), [](auto &e) {
-		e.template getComponent<std::string>() = "World";
+		e.template getComponent<std::string>() = " World!";
 	});
 	std::size_t idx = 0;
 	mgr.forEntities([&](auto &e, size_t &idx) {

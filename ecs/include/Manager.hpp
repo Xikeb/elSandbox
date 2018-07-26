@@ -175,25 +175,23 @@
 		class Manager {
 		public:
 			using Settings = TSettings;
-			using ComponentList = typename Settings::ComponentList;
-			using TagList = typename Settings::TagList;
 			using Entity = ecs::Entity<Settings>;
 			using Handle = ecs::EntityHandle<Settings>;
 
-			constexpr static std::size_t componentCount = ComponentList::size;
-			constexpr static std::size_t tagCount = TagList::size;
+			constexpr static std::size_t componentCount = Settings::ComponentList::size;
+			constexpr static std::size_t tagCount = Settings::TagList::size;
 
 			template<typename T>
-			constexpr static bool isComponent = ComponentList::template Contains<T>::value;
+			constexpr static bool isComponent = Settings::ComponentList::template Contains<T>::value;
 
 			template<typename T>
-			constexpr static std::size_t componentId = ComponentList::template IndexOf<T>::value;
+			constexpr static std::size_t componentId = Settings::ComponentList::template IndexOf<T>::value;
 
 			template<typename T>
-			constexpr static bool isTag = TagList::template Contains<T>::value;
+			constexpr static bool isTag = Settings::TagList::template Contains<T>::value;
 
 			template<typename T>
-			constexpr static std::size_t tagId = TagList::template IndexOf<T>::value;
+			constexpr static std::size_t tagId = Settings::TagList::template IndexOf<T>::value;
 
 			Manager()
 			{
@@ -217,7 +215,7 @@
 				auto &hdSto = this->_handleData;
 				auto nCapa = capa + (1 + addition % 128) * 128;
 
-				ComponentList().for_each([&](auto &, auto &i) {
+				Settings::ComponentList::for_each([&](auto &, auto &i) {
 					std::get<i()>(this->_componentStorage).reserve(nCapa);
 				});
 				entitiesSto.reserve(nCapa);
@@ -242,7 +240,7 @@
 
 			void killEntity(ecs::HandleDataIdx dataIdx) noexcept
 			{
-				ComponentList().for_each([&](auto &e, auto &i) {
+				Settings::ComponentList::for_each([&](auto &e, auto &) {
 					if (this->template hasComponent<typename decltype(+e)::type>(dataIdx))
 						this->template removeComponent<typename decltype(+e)::type>(dataIdx);
 				});
@@ -384,7 +382,7 @@
 			std::size_t _capacity = 0;
 			std::vector<ecs::HandleData> _handleData;
 			std::vector<ecs::Entity<Settings>> _entities;
-			el::Rename<ComponentStorage, ComponentList> _componentStorage;
+			el::Rename<ComponentStorage, typename Settings::ComponentList> _componentStorage;
 		};
 	} // ecs
 #endif /* MANAGER_H_ */

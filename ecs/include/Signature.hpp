@@ -16,19 +16,17 @@
 		class Signature {
 		public:
 			using Settings = TSettings;
-			using ComponentList = typename Settings::ComponentList;
-			using TagList = typename Settings::TagList;
 			using Types = el::type_list<TTypes...>;
-			using Components = el::type_of<decltype(ComponentList().filter(ComponentList::has))>;
-			using Tags = el::type_of<decltype(TagList().filter(TagList::has))>;
+			using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
+			using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;
 			using Required = Types;
 
 			Signature()
 			{
-				ComponentList().for_each([&](auto &e, auto &) {
+				Components::for_each([&](auto &e, auto &) {
 					this->_sto.template enableComponent<typename decltype(+e)::type>();
 				});
-				TagList().for_each([&](auto &e, auto &) {
+				Tags::for_each([&](auto &e, auto &) {
 					this->_sto.template enableTag<typename decltype(+e)::type>();
 				});
 			}
@@ -52,7 +50,7 @@
 				"implement the concept of Signature.");
 
 			using SignatureList = el::type_list<TSigs...>;
-			using Settings = SignatureList::First::Settings;
+			using Settings = typename SignatureList::First::Settings;
 			constexpr SignatureAnd()
 			{
 			}
@@ -60,11 +58,6 @@
 			constexpr static std::size_t length = SignatureList::Current::List::size;
 
 			using Bitset = std::bitset<length>;
-
-			template<typename TSettings>
-			int function_name(/* args */) noexcept {
-				
-			}
 
 			bool compare(Bitset const &othPrint) const
 			{

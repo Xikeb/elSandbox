@@ -72,8 +72,12 @@
 
 			void kill() noexcept
 			{
+				auto &mgr = this->_mgr;
+				auto dataIdx = this->_dataIdx;
+
 				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-				this->_mgr.getEntity(this->_dataIdx).kill();
+				mgr.killEntity(dataIdx);
+				// mgr.getEntity(this->_dataIdx).kill();
 			}
 
 			template<typename TSignature>

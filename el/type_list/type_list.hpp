@@ -42,7 +42,7 @@
 			using IndexOf = el::false_c;
 
 			template<typename TF, typename ...Args>
-			auto for_each(TF&& f, Args&&...)
+			static auto for_each(TF&& f, Args&&...)
 			{
 				return std::move(f);
 			}
@@ -93,7 +93,7 @@
 			using Unshift = el::type_list<THead, TRest..., T>;
 
 			template<typename Cond>
-			constexpr auto filter(Cond&& c) {
+			constexpr static auto filter(Cond&& c) {
 				return el::impl::filter(
 					el::type_c<el::type_list<>>,
 					el::type_c<This>,
@@ -122,7 +122,7 @@
 			}*/
 
 			template<typename TF, typename ...Args>
-			auto for_each(TF&& f, Args&&... args)
+			static auto for_each(TF&& f, Args&&... args)
 			{
 				return el::impl::for_each<This>(
 					el::size_c<0>(),
