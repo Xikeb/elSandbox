@@ -200,10 +200,6 @@
 
 	/*#include <iostream>
 	using namespace std;
-	template<typename T>
-	void pretty_print(T t __attribute__((unused))) {
-		std::cout << __PRETTY_FUNCTION__ << std::endl;
-	}
 
 	int main(int argc, char **argv)
 	{
