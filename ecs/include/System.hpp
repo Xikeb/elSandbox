@@ -3,6 +3,7 @@
 	#include "el/static_if.hpp"
 	#include "el/conditional.hpp"
 	#include "el/is_same.hpp"
+	#include "el/enable_if.hpp"
 	#include "el/types/is_valid.hpp"
 
 	namespace ecs {
@@ -26,105 +27,122 @@
 			};
 
 			struct Empty {};
+
+			template<typename T>
+			struct SystemImage {
+			private:
+				struct Contain {
+					T t;
+					constexpr operator T &() noexcept { return t; }
+					constexpr operator T const &() const noexcept { return t; }
+				};
+
+				struct Extend: public T {};
+			public:
+				using Type = el::conditional_t<
+					std::is_class<T>::value,
+					Extend, Contain
+				>;
+			};
 		} // impl
 
-		template<typename FCallback,/* typename TSettings,*/ typename TDependencyList, typename TInstance, typename TSignature>
-		class System {
+		template<typename T>
+		using SystemImage = typename ecs::impl::SystemImage<T>::Type;
+
+		template<typename FCallback, typename TDependencyList, typename TInstance, typename TSignature>
+		class System:
+			public std::decay<FCallback>::type,
+			public SystemImage<TInstance> {
 		public:
-			using This = System<FCallback,/* TSettings,*/ TDependencyList, TInstance, TSignature>;
+			using This = System<FCallback, TDependencyList, TInstance, TSignature>;
+			using Callback = typename std::decay<FCallback>::type;
 			using Dependencies = TDependencyList;
-			using Instance = typename el::conditional<
-					el::is_same<TInstance, void>::value,
-					ecs::impl::Empty,
-					TInstance
-				>::type;
+			using Image = SystemImage<TInstance>;
 			using Signature = TSignature;
-			using Callback = FCallback;
-			// using Manager = ecs::Manager<TSettings>;
+
+			const bool hasImage = true;
 
 			System(This const &oth):
-			image(oth.image), _f(oth._f)
+			Callback(dynamic_cast<Callback&>(oth)), Image(oth.image())
 			{
 			}
 
 			System(This &&oth):
-			image(std::move(oth.image)), _f(std::move(oth._f))
+			Callback(std::move(dynamic_cast<Callback&&>(oth))), Image(std::move(oth.image()))
 			{
 			}
 
-			template<typename ...Args>
-			System(/*std::function<Callback> f*/Callback &&f, Args&&... args):
-			image(std::forward<Args>(args)...), _f(std::move(f))
+			template<typename Function, typename ...ImageArgs>
+			System(Function &&f, ImageArgs&&... args):
+			Callback(std::forward<Function>(f)), Image(std::forward<ImageArgs>(args)...)
 			{
 			}
 
-			/*
-			System(Manager &mgr, std::function<Callback> &&f, Instance &&i):
-			image(std::move(i)), _mgr(mgr), _f(std::move(f))
+			constexpr explicit operator Image&() noexcept
 			{
+				return *this;
 			}
 
-			System(Manager &mgr, std::function<Callback> &&f, Instance const &i):
-			image(i), _mgr(mgr), _f(std::move(f))
-			{
-			}
-			*/
+			constexpr Image &image() noexcept { return *this; }
+			constexpr Image const &image() const noexcept { return *this; }
 
 			template<typename TSettings, typename ...Args>
 			void operator()(ecs::Manager<TSettings> &mgr, Args&&... args)
 			{
-				static const auto ifHasImage = el::static_if<!el::is_same<TInstance, void>::value>();
-				static const auto ifHasSignature = el::static_if<el::is_same<Signature, el::type_list<>>::value>();
+				Callback &callback = *this;
+				Image &img = *this;
 
-				static_assert(!ifHasSignature, "No Signature?");
-				static_assert(ifHasImage, "No Image?");
-				ifHasSignature
-					.then([&](){
-						// ifHasImage
-						// 	.then([&](){
-						// 		mgr.forEntitiesMatching(this->_sig, this->_f, this->image, std::forward<Args>(args)...);
-						// 	})
-						// 	.otherwise([&](){
-						// 		mgr.forEntitiesMatching(this->_sig, this->_f, std::forward<Args>(args)...);
-						// 	});
-						if (ifHasImage)
-							mgr.forEntitiesMatching(this->_sig, this->_f, this->image, std::forward<Args>(args)...);
-						else
-							mgr.forEntitiesMatching(this->_sig, this->_f, std::forward<Args>(args)...);
-					})
-					.otherwise([&](){
-						// ifHasImage
-						// 	.then([&](){
-						// 		mgr.forEntities(this->_f, this->image, std::forward<Args>(args)...);
-						// 	})
-						// 	.otherwise([&](){
-						// 		mgr.forEntities(this->_f, std::forward<Args>(args)...);
-						// 	});
-						if (ifHasImage)
-							mgr.forEntities(this->_f, this->image, std::forward<Args>(args)...);
-						else
-							mgr.forEntities(this->_f, std::forward<Args>(args)...);
-					});
+				mgr.forEntitiesMatching(this->_sig, callback, img, std::forward<Args>(args)...);
 			}
 
-
-			Instance image;
-			const bool hasImage = !el::is_same<TInstance, void>::value;
 		private:
-			//Manager &_mgr;
-			// std::function<Callback> _f;
-			Callback _f;
 			Signature _sig;
 		};
 
-		template<typename FCallback = void(void), typename TDependencyList = el::type_list<>, typename TInstance = ecs::impl::Empty, typename TSignature = el::type_list<>>
+		template<typename FCallback, typename TDependencyList, typename TSignature>
+		class System<FCallback, TDependencyList, void, TSignature>: public std::decay<FCallback>::type {
+		public:
+			using This = System<FCallback, TDependencyList, void, TSignature>;
+			using Callback = typename std::decay<FCallback>::type;
+			using Dependencies = TDependencyList;
+			using Signature = TSignature;
+			using Image = void;
+
+			const bool hasImage = false;
+
+			System(This const &oth): Callback(dynamic_cast<Callback&>(oth))
+			{
+			}
+
+			System(This &&oth): Callback(std::move(dynamic_cast<Callback&&>(oth)))
+			{
+			}
+
+			template<typename Function>
+			System(Function &&f): Callback(std::forward<Function>(f))
+			{
+			}
+
+			template<typename TSettings, typename ...Args>
+			void operator()(ecs::Manager<TSettings> &mgr, Args&&... args)
+			{
+				Callback &callback = *this;
+
+				mgr.forEntitiesMatching(this->_sig, callback, std::forward<Args>(args)...);
+			}
+
+		private:
+			Signature _sig;
+		};
+
+		template<typename FCallback = void(void), typename TDependencyList = el::type_list<>, typename TInstance = ecs::impl::Empty, typename TSignature = ecs::SignatureTrue>
 		class SystemSetup {
 		public:
 			using Settings = ecs::impl::SystemSettings;
 			using Dependencies = TDependencyList;
 			using Instance = TInstance;
 			using Signature = TSignature;
-			using Callback = FCallback;
+			using Callback = typename std::decay<FCallback>::type;
 
 			/*el::map<
 				el::pair<typename Settings::Keys::Dependencies, el::Type_c<Dependencies>>,
@@ -134,7 +152,19 @@
 			> options;*/
 			Callback callback;
 
-			constexpr explicit SystemSetup(Callback &&f): callback(f)
+			constexpr explicit SystemSetup(Callback &f): callback(f)
+			{
+			}
+
+			constexpr explicit SystemSetup(Callback const &f): callback(f)
+			{
+			}
+
+			constexpr explicit SystemSetup(Callback &&f): callback(std::move(f))
+			{
+			}
+
+			constexpr explicit SystemSetup(Callback const &&f): callback(std::move(f))
 			/*options(
 				el::make_pair(Settings::dependency, el::type_c<Dependencies>),
 				el::make_pair(Settings::instance, el::type_c<Instance>),
@@ -159,7 +189,7 @@
 			template<typename F>
 			constexpr auto execution(F&& f) noexcept
 			{
-				return SystemSetup<F, Dependencies, Instance, Signature>(std::forward<F>(f));
+				return SystemSetup<typename std::decay<F>::type, Dependencies, Instance, Signature>(std::forward<F>(f));
 			}
 
 			template<typename ...Requirements>
