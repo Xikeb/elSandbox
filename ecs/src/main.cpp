@@ -52,8 +52,8 @@ namespace test {
 	struct Inverted;
 
 	using Components = ecs::ComponentList<
-		Vector2f,// Vector3f, Vector2i, Vector3i,
-		std::string//, Transform, Color, Drawable
+		Vector2f, Vector3f, Vector2i, Vector3i,
+		std::string, Transform, Color, Drawable
 	>;
 
 	using Tags = ecs::TagList<Inverted>;
@@ -68,16 +68,17 @@ using namespace test;
 
 namespace sys {
 	constexpr auto printCallback = 
-		[](auto &e, auto &count) {
+		[](auto &e/*, auto &count*/) {
+			std::cout << '\t';
 			if (e.template hasComponent<std::string>())
 				std::cout << e.template getComponent<std::string>();
 			else
-				std::cout << "No string component!";
+				std::cout << "No std::string component!";
 			std::cout << std::endl;
-			++count;
+			// ++count;
 		};
 	auto print = ecs::makeSystem(printCallback)
-		.instantiateWith(el::type_c<int>)
+		.template instantiateWith<void>()
 		.after(el::type_c<el::type_list<>>)
 		.matching(el::type_c<test::HasString>)()
 	;
@@ -91,15 +92,15 @@ int main()
 
 	cout << boolalpha;
 	//pretty_print(Manager::componentId<Transform>);
-	for (int i = 0; i < 10; ++i) {
+	for (int i = 0; i < 100; ++i) {
 		auto e = mgr.createEntity();
 		e.template addComponent<Vector2f>(5, 5);
 		e.template addTag<Inverted>();
 		e.template addComponent<std::string>("Hello");
-		//if (i % 2 == 0)
-		//	e.template removeComponent<Vector2f>();
-		//if (i % 3 == 0)
-		//	e.template removeTag<Inverted>();
+		if (i % 2 == 0)
+			e.template removeComponent<Vector2f>();
+		if (i % 3 == 0)
+			e.template removeTag<Inverted>();
 	}
 	mgr.forEntitiesMatching(HasString(), [](auto &e) {
 		e.template getComponent<std::string>() += " World!";
@@ -112,12 +113,14 @@ int main()
 		++idx;
 	}, idx);
 	mgr.forEntitiesMatching(HasString(), [&](auto &e, std::string const &) {
-		//cout << intro << ": " << e.template getComponent<std::string>() << endl;
+		// cout << intro << ": " << e.template getComponent<std::string>() << endl;
 		cout << e.template hasComponent<Vector2f>()
 			<< " " << e.template hasTag<Inverted>()
 			<< " " << e.template getComponent<std::string>()
 		<< endl;
 	}, "I say");
+	cout << endl << "Print system launch: " << endl;
 	sys::print(mgr);
+	// cout << "Printing system has worked on [" << sys::print.image() << "] entities" << endl;
 	return 0;
 }
