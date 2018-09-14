@@ -21,7 +21,7 @@
 			using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;
 			using Required = Types;
 
-			Signature()
+			constexpr Signature()
 			{
 				Components::for_each([&](auto &e, auto &) {
 					this->_sto.template enableComponent<typename decltype(+e)::type>();
@@ -40,6 +40,15 @@
 			}
 		private:
 			SignatureBitset<Settings> _sto;
+		};
+
+		class SignatureTrue {
+		public:
+			template<typename TSettings>
+			bool compare(SignatureBitset<TSettings> const &) const noexcept
+			{
+				return true;
+			}
 		};
 
 		template<typename ...TSigs>
