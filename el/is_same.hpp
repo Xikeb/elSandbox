@@ -25,5 +25,8 @@ namespace el {
 
 	template<typename T, typename U>
 	using is_same = typename el::impl::is_same<T, U>::Result;
+
+	template<typename T, typename U>
+	constexpr bool is_same_v = el::is_same<T, U>::value;
 }
 #endif /*IS_SAME_H_*/
