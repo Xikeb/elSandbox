@@ -1,5 +1,5 @@
 Signatures:
-	- Compare Components and Tags
+	$ Compare Components and Tags
 	$ Compare against std::bitset (SimpleSignature of an entity)
 	$ Compose With SignatureAnd, SignatureOr and SignatureNot
 	? Signature Any
@@ -7,3 +7,4 @@ Signatures:
 		- Dependencies
 		- One time or keep
 	-Entity metadata
+	-Not having to use Manager Settings/BasicSettings to instantiate Signature template
