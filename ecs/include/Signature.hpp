@@ -1,5 +1,6 @@
 #ifndef ELECS_SIGNATURE_HPP
 	#define ELECS_SIGNATURE_HPP
+	#include <cassert>
 	#include <cstdlib>
 	#include <bitset>
 	#include <tuple>
@@ -12,13 +13,24 @@
 	#include "el/types/type_c.hpp"
 	
 	namespace ecs {
+		namespace impl {
+			template<typename EnabledTypesList, typename ...AllTypes>
+			constexpr static char bitsetCode[sizeof...(AllTypes) + 1] = {
+				(EnabledTypesList::template Contains<AllTypes>::value ? '0' : '1')...,
+				'\0'
+			};
+		} // impl
+
+
 		template<typename TSettings, typename ...TTypes>
 		class Signature {
 		public:
 			using Settings = TSettings;
 			using Types = el::type_list<TTypes...>;
-			using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
-			using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;
+			/*using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
+			using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;*/
+			using Components = typename Types::template Filter<typename Settings::ComponentList::Has>;
+			using Tags = typename Types::template Filter<typename Settings::TagList::Has>;
 			using Required = Types;
 
 			constexpr Signature()

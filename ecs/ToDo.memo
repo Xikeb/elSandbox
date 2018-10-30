@@ -4,7 +4,15 @@ Signatures:
 	$ Compose With SignatureAnd, SignatureOr and SignatureNot
 	? Signature Any
 	-System Object
-		- Dependencies
+		- Dependencies:
+			. Systems may or may not depend on the
+			actions and/or results of zero or more systems.
+			. So long as in the end, an acyclic graph of dependencies
+			can be computed, the end result would be that dependent
+			systems should be only executed after their dependencies,
+			and then have access to either their dependencies' images,
+			or an output accessible through a variable/function returning
+			the previously computed result
 		- One time or keep
 	-Entity metadata
-	-Not having to use Manager Settings/BasicSettings to instantiate Signature template
+	-Instantiate class template and class instance of Manager with Settings and Systems

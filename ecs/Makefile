@@ -7,7 +7,7 @@
 
 NAME		=	ecs
 
-CXX		=	g++ -std=c++1y
+CXX		=	g++ -std=c++1z
 
 RM		=	rm -f
 

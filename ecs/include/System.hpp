@@ -78,10 +78,8 @@
 			{
 			}
 
-			constexpr explicit operator Image&() noexcept
-			{
-				return *this;
-			}
+			constexpr explicit operator Image&() noexcept { return *this; }
+			constexpr explicit operator Image const &() const noexcept { return *this; }
 
 			constexpr Image &image() noexcept { return *this; }
 			constexpr Image const &image() const noexcept { return *this; }
@@ -89,10 +87,11 @@
 			template<typename TSettings, typename ...Args>
 			void operator()(ecs::Manager<TSettings> &mgr, Args&&... args)
 			{
+				Signature &sig = this->_sig;
 				Callback &callback = *this;
 				Image &img = *this;
 
-				mgr.forEntitiesMatching(this->_sig, callback, img, std::forward<Args>(args)...);
+				mgr.forEntitiesMatching(sig, callback, img, std::forward<Args>(args)...);
 			}
 
 		private:
@@ -126,16 +125,20 @@
 			template<typename TSettings, typename ...Args>
 			void operator()(ecs::Manager<TSettings> &mgr, Args&&... args)
 			{
+				Signature &sig = this->_sig;
 				Callback &callback = *this;
 
-				mgr.forEntitiesMatching(this->_sig, callback, std::forward<Args>(args)...);
+				mgr.forEntitiesMatching(sig, callback, std::forward<Args>(args)...);
 			}
 
 		private:
 			Signature _sig;
 		};
 
-		template<typename FCallback = void(void), typename TDependencyList = el::type_list<>, typename TInstance = ecs::impl::Empty, typename TSignature = ecs::SignatureTrue>
+		template<typename FCallback = void(void),
+			typename TDependencyList = el::type_list<>,
+			typename TInstance = ecs::impl::Empty,
+			typename TSignature = ecs::SignatureTrue>
 		class SystemSetup {
 		public:
 			using Settings = ecs::impl::SystemSettings;
@@ -144,12 +147,6 @@
 			using Signature = TSignature;
 			using Callback = typename std::decay<FCallback>::type;
 
-			/*el::map<
-				el::pair<typename Settings::Keys::Dependencies, el::Type_c<Dependencies>>,
-				el::pair<typename Settings::Keys::Instance, el::Type_c<Instance>>,
-				el::pair<typename Settings::Keys::Signature, el::Type_c<Signature>>,
-				el::pair<typename Settings::Keys::Callback, Callback>
-			> options;*/
 			Callback callback;
 
 			constexpr explicit SystemSetup(Callback &f): callback(f)

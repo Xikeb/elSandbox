@@ -68,17 +68,17 @@ using namespace test;
 
 namespace sys {
 	constexpr auto printCallback = 
-		[](auto &e/*, auto &count*/) {
+		[](auto &e, auto &count) {
 			std::cout << '\t';
 			if (e.template hasComponent<std::string>())
 				std::cout << e.template getComponent<std::string>();
 			else
 				std::cout << "No std::string component!";
 			std::cout << std::endl;
-			// ++count;
+			++count;
 		};
 	auto print = ecs::makeSystem(printCallback)
-		.template instantiateWith<void>()
+		.template instantiateWith<int>()
 		.after(el::type_c<el::type_list<>>)
 		.matching(el::type_c<test::HasString>)()
 	;
@@ -121,6 +121,6 @@ int main()
 	}, "I say");
 	cout << endl << "Print system launch: " << endl;
 	sys::print(mgr);
-	// cout << "Printing system has worked on [" << sys::print.image() << "] entities" << endl;
+	cout << "Printing system has worked on [" << sys::print.image() << "] entities" << endl;
 	return 0;
 }

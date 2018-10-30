@@ -41,6 +41,9 @@
 			template<typename, std::size_t = 0>
 			using IndexOf = el::false_c;
 
+			template<typename = void>
+			using Filter = el::type_list<>;
+
 			template<typename TF, typename ...Args>
 			static auto for_each(TF&& f, Args&&...)
 			{
@@ -101,10 +104,16 @@
 				);
 			}
 
-			template<typename Cond>
+			/*template<typename Cond>
 			using Filter = el::type_of<decltype(el::impl::filter<Cond>(
 				el::type_c<el::type_list<>>,
 				el::type_c<This>
+			))>;*/
+			template<typename Cond>
+			using Filter = el::type_of<decltype(el::impl::filter(
+				el::type_c<el::type_list<>>,
+				el::type_c<This>,
+				Cond{}
 			))>;
 
 			/*template<typename TF, typename Accu, typename ...Args>
