@@ -17,7 +17,7 @@
 		class EntityHandle {
 		public:
 			using Settings = TSettings;
-			using This = ecs::EntityHandle<TSettings>;
+			using This = ecs::EntityHandle<Settings>;
 
 			explicit EntityHandle(ecs::Manager<Settings> &mgr) noexcept:
 			_mgr(mgr), _dataIdx(-1), _phase(-1)
@@ -32,52 +32,39 @@
 			{
 			}
 
-			EntityHandle(This &oth):
+			EntityHandle(This const &oth):
 			_mgr(oth._mgr), _dataIdx(oth._dataIdx),
 			_phase(oth._phase)
 			{
+				// std::cerr << "Entity Handle was copied" << std::endl;
 			}
 
-			EntityHandle(This &&oth):
-			_mgr(oth._mgr), _dataIdx(oth._dataIdx),
-			_phase(oth._phase)
-			{
-			}
-
-			This &operator=(This const &oth) noexcept
+			This &operator=(This const &oth) noexcept //Placement-new is required because of reference to manager
 			{
 				return *(new (this) This(oth));
 			}
 
-			This &operator=(This &&oth) noexcept
-			{
-				return *(new (this) This(oth));
-			}
+			int getPhase() const noexcept { return this->_phase; }
+			auto &getManager() noexcept { return this->_mgr; }
 
-			int getPhase() const noexcept
+			bool isInPhase() const noexcept
 			{
-				return this->_phase;
-			}
-
-			auto &getManager() noexcept
-			{
-				return this->_mgr;
+				return (this->_mgr.getHandleData(this->_dataIdx).phase == this->_phase);
 			}
 
 			bool isValid() const noexcept
 			{
-				return (this->_mgr.getHandleData\
-					(this->_dataIdx).phase == this->_phase);
+				return this->isInPhase() && this->_mgr.getEntity(this->_dataIdx);
 			}
 
 			void kill() noexcept
 			{
-				auto &mgr = this->_mgr;
-				auto dataIdx = this->_dataIdx;
+				// auto &mgr = this->_mgr;
+				// auto dataIdx = this->_dataIdx;
 
-				assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-				mgr.killEntity(dataIdx);
-				// mgr.getEntity(this->_dataIdx).kill();
+				// assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+				assert(this->isInPhase());
+				this->_mgr.killEntity(this->_dataIdx);
 			}
 
 			template<typename TSignature>

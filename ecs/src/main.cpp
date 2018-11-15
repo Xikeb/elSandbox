@@ -86,11 +86,17 @@ namespace sys {
 
 int main()
 {
+	cout << boolalpha;
+
 	using Manager = ecs::Manager<test::Settings>;
 	Manager mgr;
+	cout << "Tags:\t";
+	el::detail::pretty_print(el::type_c<Manager::Settings::TagList>);
+	cout << endl;
+	cout << "IsTag: " << Manager::isTag<test::Inverted> << endl;
+	cout << endl;
 
 
-	cout << boolalpha;
 	//pretty_print(Manager::componentId<Transform>);
 	for (int i = 0; i < 100; ++i) {
 		auto e = mgr.createEntity();
@@ -117,6 +123,10 @@ int main()
 		cout << e.template hasComponent<Vector2f>()
 			<< " " << e.template hasTag<Inverted>()
 			<< " " << e.template getComponent<std::string>()
+			<< "("
+				<< "inPhase: " << e.isInPhase()
+				<< ", valid: " << e.isValid()
+			<< ")"
 		<< endl;
 	}, "I say");
 	cout << endl << "Print system launch: " << endl;

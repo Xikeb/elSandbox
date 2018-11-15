@@ -5,5 +5,6 @@
  *      Author: eliord
  */
 
+#include <gtest/gtest.h>
 #include "Entity.hpp"
 

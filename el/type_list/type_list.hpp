@@ -93,7 +93,9 @@
 
 			using Shift = Next;
 			template<typename T>
-			using Unshift = el::type_list<THead, TRest..., T>;
+			using Unshift = el::type_list<T, THead, TRest...>;
+			template<typename T>
+			using Push = el::type_list<T, THead, TRest..., T>;
 
 			template<typename Cond>
 			constexpr static auto filter(Cond&& c) {

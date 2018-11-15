@@ -31,14 +31,6 @@
 			{
 			}
 
-			Entity(Entity &&oth)
-			{
-				std::swap(this->eid, oth.eid);
-				std::swap(this->hdIndex, oth.hdIndex);
-				std::swap(this->_alive, oth._alive);
-				std::swap(this->_signature, oth._signature);
-			}
-
 			template<typename TSignature>
 			bool matchesSignature(TSignature&& sig = TSignature())
 			{
@@ -99,6 +91,9 @@
 			{
 				this->_signature.template disableTag<T>();
 			}
+
+			operator bool() const noexcept { return this->alive(); }
+			bool operator!() const noexcept { return !this->alive(); }
 
 			ecs::EntityIdx eid;
 			ecs::HandleDataIdx hdIndex;

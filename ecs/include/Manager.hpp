@@ -63,22 +63,45 @@
 				this->enlarge(1000);
 			}
 
+			std::size_t capacity() const noexcept { return this->_capacity; }
+			/*
+				* Vittorio Romeo had chosen for his entityCount that it would record
+				* neither the entities destroyed between two calls to .refresh() as it
+				* would require a specialized variable/logic, nor the entities created
+				* during that time, for consistency with the previous choice.
+				*
+				* Here, I've chosen to count the entities created, to save myself the
+				* iteration over the metadata of entities known to be absolutely dead
+				* (even more critical after a long operation time, due to the allocation
+				* done for reserve)
+				* and to actually know how much metadata are we iterating over with
+				* calls to .forEntities() and .forEntitiesMatching()
+			*/
+			std::size_t entityCount() const noexcept { return this->_size; }
+
 			ecs::HandleData const &getHandleData(ecs::HandleDataIdx hdIdx) noexcept
 			{
 				return this->_handleData[hdIdx];
 			}
 
+			Entity const &getEntity(ecs::HandleDataIdx dataIdx) const noexcept
+			{
+				// std::cout << "GetConstantEntity" << std::endl;
+				return this->_entities[this->_handleData[dataIdx].entityPosition];
+			}
+
 			Entity &getEntity(ecs::HandleDataIdx dataIdx) noexcept
 			{
+				// std::cout << "GetEntity" << std::endl;
 				return this->_entities[this->_handleData[dataIdx].entityPosition];
 			}
 
 			void enlarge(std::size_t addition)
 			{
-				auto capa = this->_capacity;
 				auto &entitiesSto = this->_entities;
 				auto &hdSto = this->_handleData;
-				auto nCapa = capa + (1 + addition % 128) * 128;
+				auto capa = this->_capacity;
+				auto nCapa = capa + (1 + addition / 128u) * 128;
 
 				Settings::ComponentList::for_each([&](auto &, auto &i) {
 					std::get<i()>(this->_componentStorage).reserve(nCapa);
@@ -114,27 +137,27 @@
 
 			void refresh() noexcept
 			{
-				auto itAlive = this->_size - 1;
-				auto itDead = 0;
+				auto iAlive = this->_size - 1;
+				auto iDead = 0;
 				auto &hds = this->_handleData;
+				auto &ents = this->_entities;
 
-				while (itDead < itAlive) {
-					auto &d = this->_entities[itDead];
-					auto &a = this->_entities[itAlive];
-					for(; d->alive(); ++itDead);
-					for(; !a->alive(); ++itAlive);
-					if (itDead < itAlive) {
-						auto &hdDead = hds[d.hdIndex];
-						auto &hdAlive = hds[a.hdIndex];
-
-						std::swap(d, a);
-						hdDead.entityPosition = itAlive;
-						++hdAlive.phase;
-						hdAlive.entityPosition = itDead;
-					} else
+				while (iDead < iAlive) {
+					for(; ents[iDead]->alive(); ++iDead);
+					for(; !ents[iAlive]->alive(); ++iAlive);
+					if (iDead >= iAlive)
 						break;
+					auto &d = ents[iDead];
+					auto &a = ents[iAlive];
+					auto &hdDead = hds[d.hdIndex];
+					auto &hdAlive = hds[a.hdIndex];
+
+					std::swap(d, a);
+					hdDead.entityPosition = iAlive;
+					++hdAlive.phase;
+					hdAlive.entityPosition = iDead;
 				}
-				this->size = itDead;
+				this->size = iDead;
 			}
 
 			template<typename T>
@@ -257,13 +280,14 @@
 
 		private:
 			template<typename ...Types>
-			using ComponentStorage = std::tuple<std::vector<Types>...>;
+			using ComponentStorageTuple = std::tuple<std::vector<Types>...>;
+			using ComponentStorage = el::Rename<ComponentStorageTuple, typename Settings::ComponentList>;
 
 			std::size_t _size = 0;
 			std::size_t _capacity = 0;
 			std::vector<ecs::HandleData> _handleData;
 			std::vector<ecs::Entity<Settings>> _entities;
-			el::Rename<ComponentStorage, typename Settings::ComponentList> _componentStorage;
+			ComponentStorage _componentStorage;
 		};
 	} // ecs
 #endif /* MANAGER_H_ */
