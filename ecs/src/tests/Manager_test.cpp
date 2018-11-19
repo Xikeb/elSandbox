@@ -7,6 +7,8 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
+#include <memory>
+#include <chrono>
 
 #include "Manager.hpp"
 #include "el/detail/pretty_print.hpp"
@@ -58,6 +60,7 @@ namespace test {
 	};
 
 	struct Inverted;
+	struct KillOnSight;
 } //test
 
 namespace test {
@@ -66,7 +69,7 @@ namespace test {
 		std::string, Transform, Color, Drawable
 	>;
 
-	using Tags = ecs::TagList<Inverted>;
+	using Tags = ecs::TagList<Inverted, KillOnSight>;
 
 	using Settings = ecs::Settings<Components, Tags>;
 
@@ -81,6 +84,15 @@ namespace test {
 	using HasString = ecs::Signature<Settings::Basic, std::string>;
 } // test
 using namespace test;
+
+template<typename T, typename ...Args>
+void benchmark(T&& callable, std::size_t reps = 1000, string label = "Tested function", Args&&...args) {
+	auto then = std::chrono::high_resolution_clock::now();
+	for (auto i = reps; i > 0; --i)
+		callable(std::forward<Args>(args)...);
+	auto now = std::chrono::high_resolution_clock::now();
+	cout << label << ": " << (then - now) << "ms (" << count << "reps)\n";
+}
 
 TEST(ManagerTest, Contruction) {
 	FullManager fmgr;
@@ -148,11 +160,15 @@ TEST(ManagerTest, componentTagCount) {
 TEST(ManagerTest, createEntity) {
 	FullManager fmgr;
 	EmptyManager emgr;
+	std::size_t count = 1000;
 
 	fmgr.createEntity();
 	fmgr.createEntity();
 	fmgr.createEntity();
 	ASSERT_EQ(3, fmgr.entityCount());
+
+	for (auto i = 10000; i > 0; --i)
+		fmgr.createEntity();
 
 	emgr.createEntity();
 	emgr.createEntity();
@@ -195,6 +211,25 @@ TEST(ManagerTest, killEntity) {
 }
 
 TEST(ManagerTest, refresh) {
+	FullManager fmgr;
+	std::size_t count = 1000;
+
+	std::vector<int> ivect(count);
+	benchmark(
+		[&ivect, i = std::make_shared<int>(0)]{
+			ivect.push_back(*i);
+			++*i;
+		},
+		1000, "ivect.push_back()"
+	);
+	ivect.clear();
+	benchmark(
+		[&ivect, i = std::make_shared<int>(0)]{
+			ivect.emplace(*i);
+			++*i;
+		},
+		1000, "ivect.emplace()"
+	);
 }
 
 int main(int argc, char *argv[])
