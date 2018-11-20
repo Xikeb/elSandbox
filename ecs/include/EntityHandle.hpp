@@ -18,14 +18,29 @@
 		public:
 			using Settings = TSettings;
 			using This = ecs::EntityHandle<Settings>;
+			using Manager = ecs::Manager<Settings>;
 
-			explicit EntityHandle(ecs::Manager<Settings> &mgr) noexcept:
+			constexpr static std::size_t componentCount = Manager::componentCount;
+			constexpr static std::size_t tagCount = Manager::tagCount;
+
+			template<typename T>
+			constexpr static bool isComponent = Manager::isComponent;
+			template<typename T>
+			constexpr static bool isComponentConst = Manager::isComponentConst;
+			template<typename T>
+			constexpr static std::size_t componentId = Manager::componentId;
+			template<typename T>
+			constexpr static bool isTag = Manager::isTag;
+			template<typename T>
+			constexpr static std::size_t tagId = Manager::tagId;
+
+			explicit EntityHandle(Manager &mgr) noexcept:
 			_mgr(mgr), _dataIdx(-1), _phase(-1)
 			{
 			}
 
 			EntityHandle(
-				ecs::Manager<Settings> &mgr,
+				Manager &mgr,
 				ecs::HandleDataIdx dataIdx,
 				int phase
 			): _mgr(mgr), _dataIdx(dataIdx), _phase(phase)
@@ -168,7 +183,7 @@
 			}
 
 		private:
-			ecs::Manager<Settings> &_mgr;
+			Manager &_mgr;
 			ecs::HandleDataIdx _dataIdx;
 			int _phase;
 		};
