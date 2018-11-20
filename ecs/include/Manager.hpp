@@ -48,6 +48,8 @@
 
 			template<typename T>
 			constexpr static bool isComponent = Settings::ComponentList::template Contains<T>::value;
+			template<typename T>
+			constexpr static bool isComponentConst = Settings::ComponentList::template Contains<T>;
 
 			template<typename T>
 			constexpr static std::size_t componentId = Settings::ComponentList::template IndexOf<T>::value;
@@ -121,6 +123,7 @@
 
 				if (size >= this->_capacity)
 					this->enlarge(size / 2);
+				++this->_handleData[size].phase;
 				auto h = Handle(*this, size, this->_handleData[size].phase);
 				++this->_size;
 				return h;
@@ -137,14 +140,14 @@
 
 			void refresh() noexcept
 			{
-				auto iAlive = this->_size - 1;
-				auto iDead = 0;
+				std::size_t iAlive = this->_size - 1;
+				std::size_t iDead = 0;
 				auto &hds = this->_handleData;
 				auto &ents = this->_entities;
 
 				while (iDead < iAlive) {
-					for(; ents[iDead]->alive(); ++iDead);
-					for(; !ents[iAlive]->alive(); ++iAlive);
+					for(; ents[iDead].alive() && (iDead < iAlive); ++iDead);
+					for(; !ents[iAlive].alive() && (iDead < iAlive); --iAlive);
 					if (iDead >= iAlive)
 						break;
 					auto &d = ents[iDead];
@@ -154,10 +157,10 @@
 
 					std::swap(d, a);
 					hdDead.entityPosition = iAlive;
-					++hdAlive.phase;
+					// ++hdAlive.phase;
 					hdAlive.entityPosition = iDead;
 				}
-				this->size = iDead;
+				this->_size = iDead;
 			}
 
 			template<typename T>
