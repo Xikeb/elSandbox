@@ -43,6 +43,7 @@ exec:	$(NAME)
 debug:	CPPFLAGS += -g3 -O0
 debug:	exec
 
+test: CPPFLAGS += -g3 -O0
 test: $(TESTOBJS)
 	 $(CXX) $(TESTOBJS) -o $(TESTNAME) $(TESTLDFLAGS)
 
@@ -56,5 +57,6 @@ fclean: clean
 	$(RM) $(NAME) $(TESTNAME)
 
 re: fclean all
+retest: fclean test
 
 .PHONY: all clean fclean re
