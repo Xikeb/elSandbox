@@ -1,9 +1,12 @@
 Signatures:
 	$ Compare Components and Tags
 	$ Compare against std::bitset (SimpleSignature of an entity)
-	$ Compose With SignatureAnd, SignatureOr and SignatureNot
-	? Signature Any
+	- Compose With SignatureAnd, SignatureOr and SignatureNot
 	-System Object
+		- Make it so that Systems<...>::SystemImage uses ecs::SystemImage<T> (built-in choice between the image and a container of it)
+		- Make system image constructible later
+		- Find a syntax such that writing out the type of the system is not such a pain anymore (see r-type, where one needed to make the systemSpecs, than use decltype on the result of calling operator() with declvals of each argument)
+			*First idea is make a templated type member in SystemSpecs in the form of SystemSpecs<..>::System<Settings>. Passing the manager at the construction of the system makes calling sysetms a lot less painful as well
 		- Dependencies:
 			. Systems may or may not depend on the
 			actions and/or results of zero or more systems.
@@ -15,4 +18,7 @@ Signatures:
 			the previously computed result
 		- One time or keep
 	-Entity metadata
+	- Multicolor tags/labels. `Black and White` tags are those that are only defined by whether they arre there or not in the bitset. Multicolor tags, on the other hand, are tags that are defined by both their presence and their value (as a constexpr enum). A use example would be any shooter/rpg, where rather than a tag IsMonster/IsPlayer/IsHuman, a colored label would make tags that are exclusive of each others
+	- Overload an operator to add/remove tags
+	- Overload an operator to add/remove component (default construction)
 	-Instantiate class template and class instance of Manager with Settings and Systems
