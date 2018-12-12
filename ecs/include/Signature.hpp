@@ -1,200 +1,263 @@
-#ifndef ELECS_SIGNATURE_HPP
-	#define ELECS_SIGNATURE_HPP
-	#include <cassert>
-	#include <cstdlib>
-	#include <bitset>
-	#include <tuple>
-	#include <iostream>
-	#include "el/detail/and.hpp"
-	#include "Settings.hpp"
-	#include "SignatureBitset.hpp"
-	#include "SignatureConcept.hpp"
-	#include "el/type_list/type_list.hpp"
-	#include "el/types/type_c.hpp"
-	
-	namespace ecs {
-		namespace impl {
-			template<typename EnabledTypesList, typename ...AllTypes>
-			constexpr static char bitsetCode[sizeof...(AllTypes) + 1] = {
-				(EnabledTypesList::template Contains<AllTypes>::value ? '0' : '1')...,
-				'\0'
-			};
-		} // impl
+#pragma once
+#include <cassert>
+#include <cstdlib>
+#include <bitset>
+#include <tuple>
+#include <iostream>
+#include <type_traits>
+#include "el/detail/and.hpp"
+#include "ecs/Settings.hpp"
+#include "el/type_list/type_list.hpp"
+#include "el/types/type_c.hpp"
+#include "ecs/SignatureBitset.hpp"
+#include "ecs/SignatureConcept.hpp"
+#include "ecs/Settings.hpp"
 
-
-		template<typename TSettings, typename ...TTypes>
-		class Signature {
-		public:
-			using Settings = TSettings;
-			using Types = el::type_list<TTypes...>;
-			/*using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
-			using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;*/
-			using Components = typename Types::template Filter<typename Settings::ComponentList::Has>;
-			using Tags = typename Types::template Filter<typename Settings::TagList::Has>;
-			using Required = Types;
-
-			constexpr Signature()
-			{
-				Components::for_each([&](auto &e, auto &) {
-					this->_sto.template enableComponent<typename decltype(+e)::type>();
-				});
-				Tags::for_each([&](auto &e, auto &) {
-					this->_sto.template enableTag<typename decltype(+e)::type>();
-				});
-			}
-
-			constexpr static std::size_t componentCount = Components::size;
-			constexpr static std::size_t tagCount = Tags::size;
-
-			bool compare(SignatureBitset<Settings> const &othPrint) const noexcept
-			{
-				return this->_sto.matches(othPrint);
-			}
-		private:
-			SignatureBitset<Settings> _sto;
+namespace ecs {
+	namespace impl {
+		template<typename EnabledTypesList, typename ...AllTypes>
+		constexpr static char bitsetCode[sizeof...(AllTypes) + 1] = {
+			(EnabledTypesList::template Contains<AllTypes>::value ? '0' : '1')...,
+			'\0'
 		};
+	} // impl
 
-		class SignatureTrue {
-		public:
-			template<typename TSettings>
-			bool compare(SignatureBitset<TSettings> const &) const noexcept
-			{
-				return true;
-			}
-		};
+	template<typename TSettings, typename ...TTypes>
+	class Signature {
+	public:
+		using Settings = ecs::detail::get_basic_settings<TSettings>;
+		using Types = el::type_list<TTypes...>;
+		/*using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
+		using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;*/
+		using Components = typename Types::template Filter<typename Settings::ComponentList::Has>;
+		using Tags = typename Types::template Filter<typename Settings::TagList::Has>;
+		using Required = Types;
 
-		template<typename ...TSigs>
-		class SignatureAnd {
-		public:
-			static_assert(el::detail::andf(isSignature(TSigs())...),
-				"Operands of signature logic classes must all "
-				"implement the concept of Signature.");
+		constexpr Signature()
+		{
+			Components::for_each([&](auto &e, auto &) {
+				this->_sto.template enableComponent<typename decltype(+e)::type>();
+			});
+			Tags::for_each([&](auto &e, auto &) {
+				this->_sto.template enableTag<typename decltype(+e)::type>();
+			});
+		}
 
-			using SignatureList = el::type_list<TSigs...>;
-			using Settings = typename SignatureList::First::Settings;
-			constexpr SignatureAnd()
-			{
-			}
+		constexpr static std::size_t componentCount = Components::size;
+		constexpr static std::size_t tagCount = Tags::size;
 
-			constexpr static std::size_t length = SignatureList::Current::List::size;
+		template<typename OthSettings>
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const noexcept
+		{
+			return this->_sto.matches(othPrint);
+		}
 
-			using Bitset = std::bitset<length>;
+		SignatureBitset<Settings> getBitset() const noexcept { return this->_sto; }
+	private:
+		SignatureBitset<Settings> _sto;
+	};
 
-			bool compare(Bitset const &othPrint) const
-			{
-				return this->compareImpl<0>(othPrint);
-			}
+	class SignatureTrue {
+	public:
+		template<typename TSettings>
+		bool compare(SignatureBitset<TSettings> const &) const noexcept
+		{
+			return true;
+		}
+	};
 
-		private:
-			std::tuple<TSigs...> _sigs;
+	template<typename ...TSigs>
+	class SignatureAnd {
+	public:
+		static_assert(el::detail::andf(ecs::isSignature(TSigs())...),
+			"Operands of signature logic classes must all "
+			"implement the concept of Signature.");
 
-			template<std::size_t I>
-			el::enable_if_t<(I >= SignatureList::size), bool>
-			compareImpl(Bitset const &othPrint) const noexcept
-			{
-				return true;
-			}
+		using SignatureList = el::type_list<TSigs...>;
+		// using Settings = typename SignatureList::First::Settings;
+		constexpr SignatureAnd() = default;
 
-			template<std::size_t I>
-			el::enable_if_t<(I < SignatureList::size), bool>
-			compareImpl(Bitset const &othPrint) const noexcept
-			{
-				return std::get<I>(this->_sigs).compare(othPrint)
-					? this->compareImpl<I + 1>(othPrint)
-					: false;
-			}
-		};
+		constexpr SignatureAnd(TSigs&&... sigs): _sigs(sigs...)
+		{
+		}
 
-		template<typename ...TSigs>
-		class SignatureOr {
-		public:
-			// static_assert(el::detail::_and<
+		constexpr static std::size_t length = SignatureList::Current::List::size;
 
-			// 	>::value,
-			// 	"Template arguments must all"
-			// 	" implement the concept of Signature.");
-			using SignatureList = el::type_list<TSigs...>;
-			constexpr SignatureOr() = default;
+		template<typename OthSettings>
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const
+		{
+			return this->compareImpl<0>(othPrint);
+		}
 
-			constexpr static std::size_t length() noexcept {
-				return SignatureList::Current::List::size;
-			}
-			using Bitset = std::bitset<length()>;
+		el::enable_if_t<
+			(SignatureList::size > 0) && el::detail::andf(ecs::canGetBitset<TSigs>()...),
+			SignatureBitset<typename SignatureList::First::Settings>
+		>
+		getBitset() const noexcept
+		{ return this->_sto; }
+	private:
+		std::tuple<TSigs...> _sigs;
 
-			bool compare(Bitset const &othPrint) const
-			{
-				return this->compareImpl<0>(othPrint);
-			}
+		template<typename OthSettings, std::size_t I>
+		el::enable_if_t<(I >= SignatureList::size), bool>
+		compareImpl(SignatureBitset<OthSettings> const &) const noexcept
+		{
+			return true;
+		}
 
-		private:
-			std::tuple<TSigs...> _sigs;
+		template<typename OthSettings, std::size_t I>
+		el::enable_if_t<(I < SignatureList::size), bool>
+		compareImpl(SignatureBitset<OthSettings> const &othPrint) const noexcept
+		{
+			return std::get<I>(this->_sigs).compare(othPrint)
+				? this->compareImpl<I + 1>(othPrint)
+				: false;
+		}
+	};
 
-			template<std::size_t I>
-			bool compareImpl(Bitset const &othPrint) const noexcept {
-				if (I >= SignatureList::size)
-					return false;
-				else if (std::get<I>(this->_sigs).compare(
-					othPrint
-				))
-					return true;
-				return this->compareImpl<I + 1>(othPrint);
-			}
-		};
+	template<typename ...TSigs>
+	class SignatureOr {
+	public:
+		static_assert(el::detail::andf(ecs::isSignature(TSigs())...),
+			"Operands of signature logic classes must all "
+			"implement the concept of Signature.");
 
-		template<typename TSig>
-		class SignatureNot {
-		public:
-			// static_assert(el::detail::_and<
+		using SignatureList = el::type_list<TSigs...>;
+		constexpr SignatureOr() = default;
 
-			// 	>::value,
-			// 	"Template arguments must all"
-			// 	" implement the concept of Signature.");
-			constexpr SignatureNot() = default;
+		constexpr SignatureOr(TSigs&&... sigs): _sigs(sigs...)
+		{
+		}
 
-			using Signature = TSig;
-			using Signature::length;
-			// constexpr static std::size_t length() noexcept {
-			// 	return SignatureList::Current::List::size;
-			// }
-			using Bitset = std::bitset<length()>;
+		template<typename OthSettings>
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const
+		{
+			return this->compareImpl<0>(othPrint);
+		}
 
-			bool compare(Bitset const &othPrint) const
-			{
-				return !this->_sig.compare(othPrint);
-			}
+	private:
+		std::tuple<TSigs...> _sigs;
 
-		private:
-			Signature _sig;
-		};
+		template<typename OthSettings, std::size_t I>
+		el::enable_if_t<(I >= SignatureList::size), bool>
+		compareImpl(SignatureBitset<OthSettings> const &) const noexcept
+		{
+			return false;
+		}
 
-		template<typename TSigCond, typename TSigTrue, typename TSigFalse>
-		class SignatureConditional {
-		public:
-			// static_assert(el::detail::_and<
+		template<typename OthSettings, std::size_t I>
+		el::enable_if_t<(I < SignatureList::size), bool>
+		compareImpl(SignatureBitset<OthSettings> const &othPrint) const noexcept
+		{
+			return std::get<I>(this->_sigs).compare(othPrint)
+				? true
+				: this->compareImpl<I + 1>(othPrint);
+		}
+	};
 
-			// 	>::value,
-			// 	"Template arguments must all"
-			// 	" implement the concept of Signature.");
-			// using SignatureList = el::type_list<TSigs...>;
-			using Condition = TSigCond;
-			using IfSignature = TSigTrue;
-			using ElseSignature = TSigFalse;
-			constexpr SignatureConditional() = default;
+	template<typename TSig>
+	class SignatureNot: TSig {
+	public:
+		static_assert(decltype(ecs::isSignature(TSig()))::value,
+			"Operands of signature logic classes must all "
+			"implement the concept of Signature.");
+		constexpr SignatureNot() = default;
 
-			using Condition::length;
-			using Bitset = std::bitset<length()>;
+		constexpr SignatureNot(TSig&& sig): _sig(sig)
+		{
+		}
 
-			bool compare(Bitset const &othPrint) const
-			{
-				return this->_cond.compare(othPrint)
-				? this->_if.compare(othPrint)
-				: this->_else.compare(othPrint);
-			}
+		using Signature = TSig;
+		using Settings = typename Signature::Settings;
 
-		private:
-			Condition _cond;
-			IfSignature _if;
-			ElseSignature _else;
-		};
-	} // ecs
-#endif // ELECS_SIGNATURE_HPP
+		template<typename OthSettings>
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const
+		{
+			return !this->TSig::compare(othPrint);
+		}
+
+	private:
+		Signature _sig;
+	};
+
+	template<typename TSigCond, typename TSigTrue, typename TSigFalse>
+	class SignatureConditional {
+	public:
+		static_assert(el::detail::andf(
+				ecs::isSignature(TSigCond())(),
+				ecs::isSignature(TSigTrue())(),
+				ecs::isSignature(TSigFalse())()
+			),
+			"Operands of signature logic classes must all "
+			"implement the concept of Signature.");
+		using Condition = TSigCond;
+		using IfSignature = TSigTrue;
+		using ElseSignature = TSigFalse;
+		constexpr SignatureConditional() = default;
+
+		constexpr SignatureConditional(
+			Condition const &sCond,
+			IfSignature const &sTrue,
+			ElseSignature const &sFalse
+		): _cond(sCond), _if(sTrue), _else(sFalse)
+		{
+		}
+
+		template<typename OthSettings>
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const
+		{
+			return this->_cond.compare(othPrint)
+			? this->_if.compare(othPrint)
+			: this->_else.compare(othPrint);
+		}
+
+	private:
+		Condition _cond;
+		IfSignature _if;
+		ElseSignature _else;
+	};
+
+	template<typename ...T1Sigs, typename ...T2Sigs>
+	auto operator&(
+		ecs::SignatureAnd<T1Sigs...> const&,
+		ecs::SignatureAnd<T2Sigs...> const&
+	) noexcept
+	{
+		return ecs::SignatureAnd<T1Sigs..., T2Sigs...>{};
+	}
+
+	template<typename ...T1Sigs, typename T2Sig>
+	el::enable_if_t<
+		decltype(ecs::isSignature(T2Sig{}))::value,
+		ecs::SignatureAnd<std::decay_t<T1Sigs>..., std::decay_t<T2Sig>>
+	>
+	operator&(
+		ecs::SignatureAnd<T1Sigs...> const&,
+		T2Sig const&
+	) noexcept
+	{
+		return ecs::SignatureAnd<std::decay_t<T1Sigs>..., std::decay_t<T2Sig>>{};
+	}
+
+	template<typename ...T1Sigs, typename ...T2Sigs>
+	auto operator|(
+		ecs::SignatureOr<T1Sigs...> const&,
+		ecs::SignatureOr<T2Sigs...> const&
+	) noexcept
+	{
+		return ecs::SignatureOr<T1Sigs..., T2Sigs...>{};
+	}
+
+	template<typename ...T1Sigs, typename T2Sig>
+	el::enable_if_t<
+		decltype(ecs::isSignature(T2Sig{}))::value,
+		ecs::SignatureOr<std::decay_t<T1Sigs>..., std::decay_t<T2Sig>>
+	>
+	operator|(
+		ecs::SignatureOr<T1Sigs...> const&,
+		T2Sig const&
+	) noexcept
+	{
+		return ecs::SignatureOr<std::decay_t<T1Sigs>..., std::decay_t<T2Sig>>{};
+	}
+} // ecs
