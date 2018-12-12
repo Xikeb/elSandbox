@@ -1,5 +1,6 @@
 #ifndef ELMETA_STATIC_IF_HPP
 	#define ELMETA_STATIC_IF_HPP
+	#include "el/types/integral_c.hpp"
 
 	namespace el {
 		namespace impl {

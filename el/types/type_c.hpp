@@ -1,7 +1,7 @@
 #ifndef ELMETA_TYPE_C_HPP
 	#define ELMETA_TYPE_C_HPP
 	#include "el/remove_ref.hpp"
-	#define TYPE_OF(t)		type_of<decltype(t)>
+	#define TYPE_OF(t)		el::type_of<decltype(t)>
 
 	namespace el {
 		template<typename T>
@@ -69,6 +69,6 @@
 		constexpr static el::Type_c<T> type_c = {};
 
 		template<typename T>
-		using type_of = typename T::type;
+		using type_of = typename el::remove_ref_t<T>::type;
 	} // el
 #endif // ELMETA_TYPE_C_HPP

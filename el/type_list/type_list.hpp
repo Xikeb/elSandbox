@@ -21,6 +21,9 @@
 	#include "el/is_same.hpp"
 	#include "el/type_list/filter.hpp"
 	#include "el/type_list/for_each.hpp"
+	#include "el/type_list/every.hpp"
+	#include "el/type_list/reduce.hpp"
+	#include "el/type_list/some.hpp"
 	#include "el/type_list/contains.hpp"
 
 	namespace el {
@@ -37,6 +40,22 @@
 
 			template<typename>
 			using Contains = el::false_c;
+
+			struct Has {
+				constexpr Has() = default;
+				template<typename T>
+				constexpr auto operator()() const noexcept
+				{
+					return el::false_c{};
+				}
+				template<typename T>
+				constexpr auto operator()(el::Type_c<T>) const noexcept
+				{
+					return el::false_c{};
+				}
+			};
+
+			constexpr static Has has{};
 
 			template<typename, std::size_t = 0>
 			using IndexOf = el::false_c;
@@ -56,6 +75,7 @@
 			using This = el::type_list<THead, TRest...>;
 			using Current = THead;
 			using Next = type_list<TRest...>;
+			using First = THead;
 			
 			constexpr type_list() = default;
 
@@ -82,11 +102,11 @@
 			constexpr static Has has{};
 
 			template<typename TElem, std::size_t TPos = 0>
-			using IndexOf = typename el::conditional<
-				el::is_same<Current, TElem>::value,
+			using IndexOf = typename el::conditional_t<
+				el::is_same_v<Current, TElem>,
 				el::size_c<TPos>,
 				typename Next::template IndexOf<TElem, TPos + 1>
-			>::type;
+			>;
 
 			template<std::size_t Pos>
 			using At = typename el::at<Pos, This>;
@@ -133,11 +153,42 @@
 			}*/
 
 			template<typename TF, typename ...Args>
-			static auto for_each(TF&& f, Args&&... args)
+			constexpr static auto for_each(TF&& f, Args&&... args)
 			{
 				return el::impl::for_each<This>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
+					std::forward<Args>(args)...
+				);
+			}
+
+			template<typename TF, typename ...Args>
+			constexpr static auto every(TF&& f, Args&&... args)
+			{
+				return el::impl::every<This>(
+					el::size_c<0>(),
+					std::forward<TF>(f),
+					std::forward<Args>(args)...
+				);
+			}
+
+			template<typename TF, typename ...Args>
+			constexpr static auto some(TF&& f, Args&&... args)
+			{
+				return el::impl::some<This>(
+					el::size_c<0>(),
+					std::forward<TF>(f),
+					std::forward<Args>(args)...
+				);
+			}
+
+			template<typename TF, typename Acc, typename ...Args>
+			constexpr static auto reduce(TF&& f, Acc&& acc, Args&&... args)
+			{
+				return el::impl::reduce<This>(
+					el::size_c<size - 1>(),
+					std::forward<TF>(f),
+					std::forward<Acc>(acc),
 					std::forward<Args>(args)...
 				);
 			}
@@ -162,9 +213,17 @@
 			};
 		} // impl
 
+		namespace impl {
+			template<typename T>
+			struct IsTypeList: el::false_c {};
+			template<typename ...Types>
+			struct IsTypeList<el::type_list<Types...>>: el::true_c {};
+		} // impl
+
 		template<typename List>
 		using IsEnd = typename el::impl::IsEnd<List>::Result;
-
+		template<typename T>
+		using is_type_list = el::impl::IsTypeList<T>;
 		/*
 		 * At
 		 */
