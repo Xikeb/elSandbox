@@ -21,4 +21,7 @@ Signatures:
 	- Multicolor tags/labels. `Black and White` tags are those that are only defined by whether they arre there or not in the bitset. Multicolor tags, on the other hand, are tags that are defined by both their presence and their value (as a constexpr enum). A use example would be any shooter/rpg, where rather than a tag IsMonster/IsPlayer/IsHuman, a colored label would make tags that are exclusive of each others
 	- Overload an operator to add/remove tags
 	- Overload an operator to add/remove component (default construction)
+	- Replace all enable_if for add/remove/get/has component/tag y static asserts, for the sake of verbosity
+	- overload comma operator of type_c so that juxtaposing them with commas makes a type_list
+	-Make Signatures and type_lists constructible with instances of the types of the parameer packs, for template dedection
 	-Instantiate class template and class instance of Manager with Settings and Systems
