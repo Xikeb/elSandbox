@@ -118,8 +118,8 @@ namespace ecs {
 		{
 		}
 
-		constexpr explicit operator Image&() noexcept { return *this; }
-		constexpr explicit operator Image const &() const noexcept { return *this; }
+		constexpr operator Image&() noexcept { return *this; }
+		constexpr operator Image const &() const noexcept { return *this; }
 
 		constexpr Image &image() noexcept { return *this; }
 		constexpr Image const &image() const noexcept { return *this; }
