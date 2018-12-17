@@ -104,8 +104,8 @@ namespace ecs {
 			auto capa = this->_capacity;
 			auto nCapa = capa + (1 + addition / 128u) * 128;
 
-			Settings::ComponentList::for_each([&](auto &, auto &i) {
-				std::get<i()>(this->_componentStorage).reserve(nCapa);
+			Settings::ComponentList::for_each([this, nCapa](auto &, auto &id) {
+				std::get<id()>(this->_componentStorage).reserve(nCapa);
 			});
 			entitiesSto.reserve(nCapa);
 			hdSto.reserve(nCapa);
@@ -122,8 +122,8 @@ namespace ecs {
 
 			if (size >= this->_capacity)
 				this->enlarge(size / 2);
-			++this->_handleData[size].phase;
-			auto h = Handle(*this, size, this->_handleData[size].phase);
+			// ++this->_handleData[size].phase;
+			auto h = Handle(*this, size, ++this->_handleData[size].phase);
 			++this->_size;
 			return h;
 		}
@@ -147,26 +147,25 @@ namespace ecs {
 			auto &ents = this->_entities;
 
 			while (iDead < iAlive) {
-				for(; ents[iDead].alive() && (iDead < iAlive); ++iDead);
-				for(; !ents[iAlive].alive() && (iDead < iAlive); --iAlive);
+				for(; ents[iDead].alive()/* && (iDead < iAlive)*/; ++iDead);
+				for(; !ents[iAlive].alive()/* && (iDead < iAlive)*/; --iAlive);
 				if (iDead >= iAlive)
 					break;
 				auto &d = ents[iDead];
 				auto &a = ents[iAlive];
-				auto &hdDead = hds[d.hdIndex];
-				auto &hdAlive = hds[a.hdIndex];
 
 				std::swap(d, a);
-				hdDead.entityPosition = iAlive;
+				hds[d.hdIndex].entityPosition = iDead;
 				// ++hdAlive.phase;
-				hdAlive.entityPosition = iDead;
+				hds[a.hdIndex].entityPosition = iAlive;
 			}
-			this->_size = iDead + 1;
+			this->_size = iDead;
 		}
 
 		template<typename T>
-		el::enable_if_t<isComponent<T>, bool> hasComponent(ecs::HandleDataIdx hdIdx) const noexcept
+		bool hasComponent(ecs::HandleDataIdx hdIdx) const noexcept
 		{
+			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 			assert(e.alive());
@@ -174,8 +173,9 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isComponent<T>, T&> getComponent(ecs::HandleDataIdx hdIdx) noexcept
+		T& getComponent(ecs::HandleDataIdx hdIdx) noexcept
 		{
+			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto entityPosition = this->_handleData[hdIdx].entityPosition;
 			auto &e = this->_entities[entityPosition];
 
@@ -184,8 +184,9 @@ namespace ecs {
 		}
 
 		template<typename T, typename ...Args>
-		el::enable_if_t<isComponent<T>, T&> addComponent(ecs::HandleDataIdx hdIdx, Args&&... args) noexcept
+		T& addComponent(ecs::HandleDataIdx hdIdx, Args&&... args) noexcept
 		{
+			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto entityPosition = this->_handleData[hdIdx].entityPosition;
 			auto &e = this->_entities[entityPosition];
 
@@ -197,8 +198,9 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isComponent<T>, void> removeComponent(ecs::HandleDataIdx hdIdx) noexcept
+		void removeComponent(ecs::HandleDataIdx hdIdx) noexcept
 		{
+			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 			assert(e.alive());
@@ -208,8 +210,9 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isTag<T>, bool> hasTag(ecs::HandleDataIdx hdIdx) const noexcept
+		bool hasTag(ecs::HandleDataIdx hdIdx) const noexcept
 		{
+			static_assert(isTag<T>, "T isn't a Tag according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 			assert(e.alive());
@@ -217,8 +220,9 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isTag<T>, void> addTag(ecs::HandleDataIdx hdIdx) noexcept
+		void addTag(ecs::HandleDataIdx hdIdx) noexcept
 		{
+			static_assert(isTag<T>, "T isn't a Tag according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 			assert(e.alive());
@@ -226,8 +230,9 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isTag<T>, void> removeTag(ecs::HandleDataIdx hdIdx) noexcept
+		void removeTag(ecs::HandleDataIdx hdIdx) noexcept
 		{
+			static_assert(isTag<T>, "T isn't a Tag according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
 			assert(e.alive());
@@ -244,7 +249,7 @@ namespace ecs {
 			for (std::size_t i = 0; i < size; ++i) {
 				auto &e = et[i];
 				if (e.alive()) {
-					auto h = Handle(*this, i, hdt[e.hdIndex].phase);
+					auto h = Handle(*this, e.hdIndex, hdt[e.hdIndex].phase);
 					f(h, std::forward<Args>(args)...);
 				}
 			}
@@ -260,7 +265,7 @@ namespace ecs {
 			for (std::size_t i = 0; i < size; ++i) {
 				auto &e = et[i];
 				if (e.alive() && e.matchesSignature(TSig{})) {
-					auto h = Handle(*this, i, hdt[e.hdIndex].phase);
+					auto h = Handle(*this, e.hdIndex, hdt[e.hdIndex].phase);
 					f(h, std::forward<Args>(args)...);
 				}
 			}
@@ -276,7 +281,7 @@ namespace ecs {
 			for (std::size_t i = 0; i < size; ++i) {
 				auto &e = et[i];
 				if (e.alive() && e.matchesSignature(s)) {
-					auto h = Handle(*this, i, hdt[e.hdIndex].phase);
+					auto h = Handle(*this, e.hdIndex, hdt[e.hdIndex].phase);
 					f(h, std::forward<Args>(args)...);
 				}
 			}
