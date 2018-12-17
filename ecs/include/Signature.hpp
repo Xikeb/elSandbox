@@ -5,13 +5,15 @@
 #include <tuple>
 #include <iostream>
 #include <type_traits>
+
 #include "el/detail/and.hpp"
-#include "ecs/Settings.hpp"
 #include "el/type_list/type_list.hpp"
 #include "el/types/type_c.hpp"
-#include "ecs/SignatureBitset.hpp"
-#include "ecs/SignatureConcept.hpp"
-#include "ecs/Settings.hpp"
+
+#include "Settings.hpp"
+#include "SignatureBitset.hpp"
+#include "SignatureConcept.hpp"
+#include "Settings.hpp"
 
 namespace ecs {
 	namespace impl {
