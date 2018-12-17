@@ -7,118 +7,16 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
-#include <memory>
-#include <chrono>
-#include <iomanip>
 
-#include "Manager.hpp"
 #include "el/static_if.hpp"
-#include "el/remove_ref.hpp"
-#include "el/detail/pretty_print.hpp"
 #include "el/types/type_c.hpp"
 #include "el/types/is_valid.hpp"
-#define ECS_TAG(t)			namespace tag { constexpr static el::Type_c<t> t = {}; }
-#define ECS_COMPONENT(t)		namespace comp { constexpr static el::Type_c<t> t = {}; }
+#include "Manager.hpp"
+#include "unit-tests-setup.hpp"
 
+using namespace test;
 using namespace std;
 using namespace el::detail;
-namespace test {
-	struct Vector2i {
-		Vector2i(int x = 0, int y = 0): x(x), y(y) {}
-		int x;
-		int y;
-	};
-
-	struct Vector3i {
-		Vector3i(int x = 0, int y = 0, int z = 0): x(x), y(y), z(z) {}
-		int x;
-		int y;
-		int z;
-	};
-
-	struct Vector2f {
-		Vector2f(float x = 0, float y = 0): x(x), y(y) {}
-		float x;
-		float y;
-	};
-
-	struct Vector3f {
-		Vector3f(float x = 0, float y = 0, float z = 0): x(x), y(y), z(z) {}
-		float x;
-		float y;
-		float z;
-	};
-
-	struct Transform {
-		Vector2f pos;
-		Vector2f rot;
-		Vector2f sca;
-	};
-
-	union Color {
-		char rgba[4];
-		int col;
-	};
-
-	struct Drawable {
-		Color col;
-		float depth;
-	};
-
-	struct Inverted;
-	struct KillOnSight;
-} //test
-
-namespace test {
-	using Components = ecs::ComponentList<
-		Vector2f, Vector3f, Vector2i, Vector3i,
-		std::string, Transform, Color, Drawable
-	>;
-
-	using Tags = ecs::TagList<Inverted, KillOnSight>;
-
-	using Settings = ecs::Settings<Components, Tags>;
-
-	using FullManager = ecs::Manager<test::Settings>;
-	using EmptyManager = ecs::Manager<
-		ecs::Settings<
-			ecs::ComponentList<>,
-			ecs::TagList<>
-		>
-	>;
-
-	using HasString = ecs::Signature<Settings::Basic, std::string>;
-} // test
-using namespace test;
-ECS_TAG(KillOnSight);
-ECS_TAG(Inverted);
-ECS_COMPONENT(Vector2f);
-ECS_COMPONENT(Vector3f);
-ECS_COMPONENT(Vector2i);
-ECS_COMPONENT(Vector3i);
-ECS_COMPONENT(string);
-ECS_COMPONENT(Transform);
-ECS_COMPONENT(Color);
-ECS_COMPONENT(Drawable);
-
-namespace text {
-	static std::string blue = "\033[0;36m";
-	static std::string red = "\033[0;31m";
-	static std::string bold = "\033[1m";
-	static std::string reset = "\033[00m\033[m";
-} // text
-
-template<typename T, typename ...Args>
-void benchmark(T&& callable, std::size_t reps = 1000, string label = "Tested function", Args&&...args) {
-	auto then = std::chrono::high_resolution_clock::now();
-	for (auto i = reps; i > 0; --i)
-		callable(std::forward<Args>(args)...);
-	auto now = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double, std::milli> diff = now - then;
-	cout << text::blue << "[ Benchmark] " << label << ": "
-	     << std::fixed << std::setprecision(2) << diff.count()
-	     << "ms (" << reps << " reps)" << text::reset << std::endl;
-}
 
 TEST(ManagerTest, Contruction) {
 	FullManager fmgr;
@@ -243,22 +141,6 @@ TEST(ManagerTest, refresh) {
 	std::vector<decltype(emgr.createEntity())> eents;
 	std::size_t count = 100000;
 
-	std::vector<int> ivect(count);
-	benchmark(
-		[&ivect, i = std::make_shared<int>(0)]{
-			ivect.push_back(*i);
-			++*i;
-		},
-		count, "ivect.push_back()"
-	);
-	ivect.clear();
-	benchmark(
-		[&ivect, i = std::make_shared<int>(0)]{
-			ivect.emplace_back(*i);
-			++*i;
-		},
-		count, "ivect.emplace_back()"
-	);
 	count = 30;
 	for (auto i = 0u; i < count; ++i) {
 		fents.push_back(fmgr.createEntity());
@@ -279,6 +161,7 @@ TEST(ManagerTest, refresh) {
 		state += el::static_if(hasString(e))
 			.then([&state](auto &&e) {
 				std::string r;
+				EXPECT_TRUE(e.isValid());
 				if (!e.isValid())
 					return r;
 				if (e.template hasTag<KillOnSight>())
@@ -306,13 +189,9 @@ TEST(ManagerTest, refresh) {
 	fmgr.refresh();
 	fmgr.forEntities(writeValid, fstates[1]);
 	emgr.forEntities(writeValid, estates[1]);
+	EXPECT_EQ(count - count / 5, fmgr.entityCount());
 
 	cout << "FullManager: \t" << fstates[0] << endl << "\t\t" << fstates[1] << endl;
+	cout << "\t\t"; for (auto &&e: fents) cout << ("01"[e.isValid()]); cout << endl;
 	cout << "EmptyManager: \t" << estates[0] << endl << "\t\t" << estates[1] << endl;
-}
-
-int main(int argc, char *argv[])
-{
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
 }
