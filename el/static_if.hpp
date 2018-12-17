@@ -78,14 +78,14 @@
 					return true;
 				}
 
-				template<typename Callback, typename ...Args>
-				constexpr auto then(Callback &&c, Args&&... args) const noexcept
+				template<typename Callback>
+				constexpr auto then(Callback &&c) const noexcept
 				{
 					return make_staticIfResult(std::forward<Callback>(c));
 				}
 
-				template<typename Callback, typename ...Args>
-				constexpr auto otherwise(Callback&&, Args&&...) const noexcept
+				template<typename Callback>
+				constexpr auto otherwise(Callback&&) const noexcept
 				{
 					return *this;
 				}

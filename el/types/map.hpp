@@ -36,7 +36,7 @@
 			}
 
 			template<bool ...Values>
-			constexpr auto andf(el::integral_c<bool, false>, el::integral_c<bool, Values>... rest) {
+			constexpr auto andf(el::integral_c<bool, false>, el::integral_c<bool, Values>...) {
 				return el::false_c{};
 			}
 
@@ -58,9 +58,9 @@
 
 			template<typename Key, typename HValue, typename ...Keys, typename ...Values>
 			constexpr auto get_pair_by_key(
-				el::Type_c<Key> me,
+				el::Type_c<Key>,
 				el::Type_c<el::pair<Key, HValue>> head,
-				el::Type_c<el::pair<Keys, Values>> ... rest
+				el::Type_c<el::pair<Keys, Values>>...
 			) noexcept
 			{
 				return head;
