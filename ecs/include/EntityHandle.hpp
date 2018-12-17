@@ -24,13 +24,13 @@ namespace ecs {
 		constexpr static std::size_t tagCount = Manager::tagCount;
 
 		template<typename T>
-		constexpr static bool isComponent = Manager::isComponent;
+		constexpr static bool isComponent = Manager::template isComponent<T>;
 		template<typename T>
-		constexpr static std::size_t componentId = Manager::componentId;
+		constexpr static std::size_t componentId = Manager::template componentId<T>;
 		template<typename T>
-		constexpr static bool isTag = Manager::isTag;
+		constexpr static bool isTag = Manager::template isTag<T>;
 		template<typename T>
-		constexpr static std::size_t tagId = Manager::tagId;
+		constexpr static std::size_t tagId = Manager::template tagId<T>;
 
 		explicit EntityHandle(Manager &mgr) noexcept:
 		_mgr(mgr), _dataIdx(-1), _phase(-1)
@@ -259,7 +259,7 @@ namespace ecs {
 		template<typename T>
 		el::enable_if_t<
 			isComponent<T>,
-			decltype(std::declval<This>().template getComponent<T>())
+			T &
 		> operator[](el::Type_c<T> const &) const noexcept
 		{
 			return this->template getComponent<T>();
