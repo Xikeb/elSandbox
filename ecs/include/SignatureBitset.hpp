@@ -34,7 +34,7 @@ namespace ecs {
 		constexpr static std::size_t componentId = ComponentList::template IndexOf<T>::value;
 
 		template<typename T>
-		constexpr static std::size_t componentBit = componentId;
+		constexpr static std::size_t componentBit = componentId<T>;
 
 		template<typename T>
 		constexpr static bool isTag = TagList::template Contains<T>::value;
@@ -43,7 +43,7 @@ namespace ecs {
 		constexpr static std::size_t tagId = TagList::template IndexOf<T>::value;
 
 		template<typename T>
-		constexpr static std::size_t tagBit = componentCount + tagId;
+		constexpr static std::size_t tagBit = componentCount + tagId<T>;
 
 		This &reset() noexcept
 		{
