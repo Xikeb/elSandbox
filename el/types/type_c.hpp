@@ -7,16 +7,17 @@
 		template<typename T>
 		struct Type_c {
 			using type = T;
-			using This = el::Type_c<type>;
+			using Self = el::Type_c<type>;
 
 			constexpr Type_c() = default;
+			constexpr Type_c(T const &, el::enable_if_v<!std::is_void_v<T>, void *> = 0) {}
 
 			constexpr bool operator==(el::Type_c<T>)
 			{
 				return true;
 			}
 
-			constexpr bool operator==(el::Type_c<T>&)
+			constexpr bool operator==(el::Type_c<T> const &)
 			{
 				return true;
 			}
@@ -33,7 +34,7 @@
 			}
 
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U>&)
+			constexpr bool operator==(el::Type_c<U> const &)
 			{
 				return false;
 			}
@@ -46,7 +47,7 @@
 
 			auto operator+() const noexcept
 			{
-				return static_cast<This const &&>(*this);
+				return static_cast<Self const &&>(*this);
 			}
 		};
 

@@ -55,7 +55,7 @@ namespace ecs {
 		struct get_basic_settings<true, T> {using type = typename T::Basic;};
 		template<typename T>
 		struct get_basic_settings<false, T> {
-			static_assert(ecs::impl::is_basic_settings<T>::value, "This is neither full nor basic settings!");
+			static_assert(ecs::impl::is_basic_settings<T>::value, "Self is neither full nor basic settings!");
 			using type = el::enable_if_t<ecs::impl::is_basic_settings<T>::value, T>;
 		};
 	} // impl

@@ -3,8 +3,10 @@
 #include "el/detail/pretty_print.hpp"
 #include <iostream>
 #include <string>
+#include <type_traits>
 using namespace std;
 
+#include "Scheduler.hpp"
 
 namespace test {
 	struct Vector2i {
@@ -65,6 +67,7 @@ namespace test {
 using namespace test;
 
 #include "System.hpp"
+#include "SystemSpecs.hpp"
 
 namespace sys {
 	constexpr auto printCallback = 
@@ -132,5 +135,6 @@ int main()
 	cout << endl << "Print system launch: " << endl;
 	sys::print(mgr);
 	cout << "Printing system has worked on [" << sys::print.image() << "] entities" << endl;
+	cout << "Trivially constructible:";
 	return 0;
 }

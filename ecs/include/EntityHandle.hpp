@@ -17,7 +17,7 @@ namespace ecs {
 	class EntityHandle {
 	public:
 		using Settings = TSettings;
-		using This = ecs::EntityHandle<Settings>;
+		using Self = ecs::EntityHandle<Settings>;
 		using Manager = ecs::Manager<Settings>;
 
 		constexpr static std::size_t componentCount = Manager::componentCount;
@@ -45,17 +45,17 @@ namespace ecs {
 		{
 		}
 
-		EntityHandle(This const &oth):
+		EntityHandle(Self const &oth):
 		_mgr(oth._mgr), _dataIdx(oth._dataIdx),
 		_phase(oth._phase)
 		{
 			// std::cerr << "Entity Handle was copied" << std::endl;
 		}
 
-		This &operator=(This const &oth) noexcept
+		Self &operator=(Self const &oth) noexcept
 		{
 			//Placement-new is required because of reference to manager
-			return *(new (this) This(oth));
+			return *(new (this) Self(oth));
 		}
 
 		int getPhase() const noexcept { return this->_phase; }
@@ -250,7 +250,7 @@ namespace ecs {
 			return mgr.template hasTag<T>(dataIdx);
 		}
 
-		bool operator==(This const &oth) const noexcept
+		bool operator==(Self const &oth) const noexcept
 		{
 			return (&this->_mgr == &oth._mgr)
 			&& (this->_dataIdx == oth._dataIdx) && (this->_phase == oth._phase);

@@ -32,7 +32,7 @@
 
 		template<>
 		struct type_list<> {
-			using This = el::type_list<>;
+			using Self = el::type_list<>;
 
 			constexpr type_list() { }
 
@@ -63,6 +63,12 @@
 			template<typename = void>
 			using Filter = el::type_list<>;
 
+			using Shift = el::type_list<>;
+			template<typename ...T>
+			using Unshift = el::type_list<T...>;
+			template<typename ...T>
+			using Push = el::type_list<T...>;
+
 			template<typename TF, typename ...Args>
 			static auto for_each(TF&& f, Args&&...)
 			{
@@ -72,17 +78,17 @@
 
 		template<typename THead, typename ...TRest>
 		struct type_list<THead, TRest...> {
-			using This = el::type_list<THead, TRest...>;
+			using Self = el::type_list<THead, TRest...>;
 			using Current = THead;
 			using Next = type_list<TRest...>;
 			using First = THead;
-			
+
 			constexpr type_list() = default;
 
 			constexpr static std::size_t size = 1 + sizeof...(TRest);
 
 			template<typename T>
-			struct Contains: type_of<decltype(el::impl::contains<T>(el::type_c<This>, 0))> {
+			struct Contains: type_of<decltype(el::impl::contains<T>(el::type_c<Self>, 0))> {
 			};
 
 			struct Has {
@@ -90,12 +96,12 @@
 				template<typename T>
 				constexpr auto operator()() const noexcept
 				{
-					return type_of<decltype(el::impl::contains<T>(el::type_c<This>, 0))>();
+					return type_of<decltype(el::impl::contains<T>(el::type_c<Self>, 0))>();
 				}
 				template<typename T>
 				constexpr auto operator()(el::Type_c<T>) const noexcept
 				{
-					return type_of<decltype(el::impl::contains<T>(el::type_c<This>, 0))>();
+					return type_of<decltype(el::impl::contains<T>(el::type_c<Self>, 0))>();
 				}
 			};
 
@@ -109,19 +115,19 @@
 			>;
 
 			template<std::size_t Pos>
-			using At = typename el::at<Pos, This>;
+			using At = typename el::at<Pos, Self>;
 
 			using Shift = Next;
-			template<typename T>
-			using Unshift = el::type_list<T, THead, TRest...>;
-			template<typename T>
-			using Push = el::type_list<T, THead, TRest..., T>;
+			template<typename ...T>
+			using Unshift = el::type_list<T..., THead, TRest...>;
+			template<typename ...T>
+			using Push = el::type_list<THead, TRest..., T...>;
 
 			template<typename Cond>
 			constexpr static auto filter(Cond&& c) {
 				return el::impl::filter(
 					el::type_c<el::type_list<>>,
-					el::type_c<This>,
+					el::type_c<Self>,
 					std::forward<Cond>(c)
 				);
 			}
@@ -129,12 +135,12 @@
 			/*template<typename Cond>
 			using Filter = el::type_of<decltype(el::impl::filter<Cond>(
 				el::type_c<el::type_list<>>,
-				el::type_c<This>
+				el::type_c<Self>
 			))>;*/
 			template<typename Cond>
 			using Filter = el::type_of<decltype(el::impl::filter(
 				el::type_c<el::type_list<>>,
-				el::type_c<This>,
+				el::type_c<Self>,
 				Cond{}
 			))>;
 
@@ -155,7 +161,7 @@
 			template<typename TF, typename ...Args>
 			constexpr static auto for_each(TF&& f, Args&&... args)
 			{
-				return el::impl::for_each<This>(
+				return el::impl::for_each<Self>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
 					std::forward<Args>(args)...
@@ -165,7 +171,7 @@
 			template<typename TF, typename ...Args>
 			constexpr static auto every(TF&& f, Args&&... args)
 			{
-				return el::impl::every<This>(
+				return el::impl::every<Self>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
 					std::forward<Args>(args)...
@@ -175,7 +181,7 @@
 			template<typename TF, typename ...Args>
 			constexpr static auto some(TF&& f, Args&&... args)
 			{
-				return el::impl::some<This>(
+				return el::impl::some<Self>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
 					std::forward<Args>(args)...
@@ -185,7 +191,7 @@
 			template<typename TF, typename Acc, typename ...Args>
 			constexpr static auto reduce(TF&& f, Acc&& acc, Args&&... args)
 			{
-				return el::impl::reduce<This>(
+				return el::impl::reduce<Self>(
 					el::size_c<size - 1>(),
 					std::forward<TF>(f),
 					std::forward<Acc>(acc),

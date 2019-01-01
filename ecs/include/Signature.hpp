@@ -59,6 +59,9 @@ namespace ecs {
 		SignatureBitset<Settings> _sto;
 	};
 
+	template<typename TSettings, typename ...TTypes>
+	constexpr static ecs::Signature<TSettings, TTypes...> signature{};
+
 	class SignatureTrue {
 	public:
 		template<typename TSettings>
@@ -67,6 +70,7 @@ namespace ecs {
 			return true;
 		}
 	};
+	constexpr static ecs::SignatureTrue signatureTrue{};
 
 	template<typename ...TSigs>
 	class SignatureAnd {

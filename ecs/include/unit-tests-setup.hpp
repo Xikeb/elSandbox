@@ -64,6 +64,16 @@ namespace test {
 	struct Inverted;
 	struct KillOnSight;
 } //test
+ECS_NSTAG(test, Inverted);
+ECS_NSTAG(test, KillOnSight);
+ECS_NSCOMPONENT(test, Vector2i);
+ECS_NSCOMPONENT(test, Vector2f);
+ECS_NSCOMPONENT(test, Vector3i);
+ECS_NSCOMPONENT(test, Vector3f);
+ECS_NSCOMPONENT(test, Transform);
+ECS_NSCOMPONENT(test, Color);
+ECS_NSCOMPONENT(test, Drawable);
+ECS_NSCOMPONENT(std, string);
 
 namespace test {
 	using Components = ecs::ComponentList<
@@ -104,13 +114,12 @@ void benchmark(T&& callable, std::size_t reps = 1000, std::string label = "Teste
 		  << std::fixed << std::setprecision(2) << diff.count()
 		  << "ms (" << reps << " reps)" << text::reset << std::endl;
 }
-ECS_NSTAG(test, Inverted);
-ECS_NSTAG(test, KillOnSight);
-ECS_NSCOMPONENT(test, Vector2i);
-ECS_NSCOMPONENT(test, Vector2f);
-ECS_NSCOMPONENT(test, Vector3i);
-ECS_NSCOMPONENT(test, Vector3f);
-ECS_NSCOMPONENT(test, Transform);
-ECS_NSCOMPONENT(test, Color);
-ECS_NSCOMPONENT(test, Drawable);
-ECS_NSCOMPONENT(std, string);
+
+inline auto &debug_log(std::string const &label = "Debug") noexcept(noexcept(std::cout << std::declval<std::string>()))
+{
+	auto w = std::cout.width();
+	return (std::cout << text::blue << "["
+			<< std::setw(10) << label
+			<< "] " << std::setw(w)
+	);
+}

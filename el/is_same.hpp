@@ -21,6 +21,16 @@ namespace el {
 	    struct is_same<T, T> {
 	        using Result = el::true_c;
 	    };
+
+	    template <template <typename ...> class T, typename U>
+	    struct is_similar {
+	        using Result = el::false_c;
+	    };
+
+	    template <template <typename ...> class T, typename ...Args>
+	    struct is_similar<T, T<Args...>> {
+	        using Result = el::true_c;
+	    };
 	} // impl
 
 	template<typename T, typename U>
@@ -28,5 +38,11 @@ namespace el {
 
 	template<typename T, typename U>
 	constexpr bool is_same_v = el::is_same<T, U>::value;
+
+	template<template<typename ...> class T, typename U>
+	using is_similar = typename el::impl::is_similar<T, U>::Result;
+
+	template<template<typename ...> class T, typename U>
+	constexpr bool is_similar_v = el::is_similar<T, U>::value;
 }
 #endif /*IS_SAME_H_*/

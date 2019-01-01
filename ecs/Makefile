@@ -25,7 +25,8 @@ TESTNAME	=	unit-tester
 TESTSRCSDIR	=	./src/tests
 TESTSRCS	=	$(TESTSRCSDIR)/Entity_test.cpp		\
 			$(TESTSRCSDIR)/EntityHandle_test.cpp	\
-			$(TESTSRCSDIR)/Manager_test.cpp
+			$(TESTSRCSDIR)/Manager_test.cpp		\
+			$(TESTSRCSDIR)/System_test.cpp
 # TESTSRCS	=	$(patsubst $(SRCSDIR)/%.cpp, $(TESTSRCSDIR)/%_test.cpp, $(SRCS))
 
 TESTOBJS	=	$(TESTSRCS:.cpp=.o)
@@ -38,12 +39,15 @@ TESTLDFLAGS	=	-lpthread -lgtest -lgtest_main
 
 all: debug test
 
+exec:	CPPFLAGS += -s -Ofast
 exec:	$(NAME)
 
-debug:	CPPFLAGS += -g3 -O0
-debug:	exec
+debug:	CPPFLAGS += -s -Ofast
+# debug:	CPPFLAGS += -g3 -O0
+debug:	$(NAME)
 
-test: CPPFLAGS += -g3 -O0
+test: CPPFLAGS += -s -Ofast
+# test: CPPFLAGS += -g3 -O0
 test: $(TESTOBJS)
 	 $(CXX) $(TESTOBJS) -o $(TESTNAME) $(TESTLDFLAGS)
 

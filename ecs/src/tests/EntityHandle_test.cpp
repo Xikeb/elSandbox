@@ -81,13 +81,13 @@ TEST(EntityHandleTest, matchesSignature) {
 
 	size_t count = 10000000;
 	benchmark([]{
-		assert(true);
+		EXPECT_TRUE(true);
 	}, count, "assert(true)");
 	benchmark([&ent]{
-		ent.template matchesSignature<test::HasString>();
+		EXPECT_TRUE(ent.template matchesSignature<test::HasString>());
 	}, count, "ent.template matchesSignature<test::HasString>()");
 	benchmark([&ent]{
-		ent.matchesSignature(test::HasString{});
+		EXPECT_TRUE(ent.matchesSignature(test::HasString{}));
 	}, count, "ent.matchesSignature(test::HasString{})");
 }
 
