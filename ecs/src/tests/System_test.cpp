@@ -51,6 +51,9 @@ TEST(SystemTest, SignatureMatch) {
 	test::FullManager fmgr;
 	size_t count = 30;
 	size_t census = 0;
+	const static auto callback = [&census](auto&&) {
+		debug_log("NamedEntity"); ++census;
+	};
 
 	for (size_t i = 0; i < count; ++i) {
 		emgr.createEntity();
@@ -59,9 +62,6 @@ TEST(SystemTest, SignatureMatch) {
 		else
 			fmgr.createEntity();
 	}
-	const static auto callback = [&census](auto&&) {
-		debug_log("NamedEntity"); ++census;
-	};
 	auto spec = ecs::SystemSpecs{callback};
 	auto &&sysMatching = spec.matching(el::type_c<test::HasString>)();
 	auto &&sysManual = spec.matching(el::type_c<void>)();
@@ -74,8 +74,21 @@ TEST(SystemTest, SignatureMatch) {
 }
 
 TEST(SystemTest, ImageAndSignature) {
-	test::
-
+	test::EmptyManager emgr;
+	test::FullManager fmgr;
+	std::vector<test::EmptyManager::Handle> ehds;
+	std::vector<test::FullManager::Handle> fhds;
+	size_t count = 25;
+	const callback = [](auto &&ent, auto &&str) {
+		str += ent[comp::string];
+	};
+	auto spec = ecs::SystemSpecs{callback}.instantiateWith(el::type_c<string>);
+	auto &&fsys = spec("");
+	auto &&esys = spec("");
+	while(count--) {
+	     ehds.push_back(emgr.createEntity());
+	     vhds.push_back(vmgr.createEntity().addComponent(comp::string, static_cast<char>(count)));
+	 }
 }
 
 // TEST(SystemTest, IntegerImage) {
