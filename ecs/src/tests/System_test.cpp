@@ -82,7 +82,7 @@ TEST(SystemTest, ImageAndSignature) {
 	const auto callback = [](auto &&ent, auto &&str) {
 		str += ent[comp::string];
 	};
-	auto spec = ecs::SystemSpecs{callback}.instantiateWith(el::type_c<string>);
+	auto spec = ecs::SystemSpecs{callback}.instantiateWith(el::type_c<std::string>);
 	auto &&fsys = spec("");
 	auto &&esys = spec("");
 	while(count--) {
