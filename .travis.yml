@@ -23,4 +23,4 @@ script:
   # Go to working directory
   - cd ecs
   #Get compiler version
-  - make test
+  - make test -k -j
