@@ -25,4 +25,4 @@ script:
   # Go to working directory
   - cd ecs
   #Get compiler version
-  - g++ -v
+  - make test
