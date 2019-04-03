@@ -9,46 +9,41 @@
 			using type = T;
 			using Self = el::Type_c<type>;
 
-			constexpr Type_c() = default;
-			constexpr Type_c(el::enable_if_t<!std::is_void_v<T>, T const &> = 0) {}
+			constexpr Type_c() noexcept = default;
+			constexpr Type_c(T const &) {}
 
-			constexpr bool operator==(el::Type_c<T>)
-			{
-				return true;
-			}
-
-			constexpr bool operator==(el::Type_c<T> const &)
-			{
-				return true;
-			}
-
-			constexpr bool operator==(el::Type_c<T>&&)
-			{
-				return true;
-			}
+			constexpr bool operator==(el::Type_c<T>)		const noexcept { return true; }
+			constexpr bool operator==(el::Type_c<T> const &)	const noexcept { return true; }
+			constexpr bool operator==(el::Type_c<T>&&)		const noexcept { return true; }
 
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U>)
-			{
-				return false;
-			}
+			constexpr bool operator==(el::Type_c<U>)		const noexcept { return false; }
+			template<typename U>
+			constexpr bool operator==(el::Type_c<U> const &)	const noexcept { return false; }
+			template<typename U>
+			constexpr bool operator==(el::Type_c<U>&&)		const noexcept { return false; }
+
+			auto operator+() const noexcept { return static_cast<Self const &&>(*this); }
+		};
+		template<>
+		struct Type_c<void> {
+			using type = T;
+			using Self = el::Type_c<type>;
+
+			constexpr Type_c() noexcept = default;
+
+			constexpr bool operator==(el::Type_c<T>)		const noexcept { return true; }
+			constexpr bool operator==(el::Type_c<T> const &)	const noexcept { return true; }
+			constexpr bool operator==(el::Type_c<T>&&)		const noexcept { return true; }
 
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U> const &)
-			{
-				return false;
-			}
-
+			constexpr bool operator==(el::Type_c<U>)		const noexcept { return false; }
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U>&&)
-			{
-				return false;
-			}
+			constexpr bool operator==(el::Type_c<U> const &)	const noexcept { return false; }
+			template<typename U>
+			constexpr bool operator==(el::Type_c<U>&&)		const noexcept { return false; }
 
-			auto operator+() const noexcept
-			{
-				return static_cast<Self const &&>(*this);
-			}
+			auto operator+() const noexcept { return static_cast<Self const &&>(*this); }
 		};
 
 		/*
