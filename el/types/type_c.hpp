@@ -27,14 +27,14 @@
 		};
 		template<>
 		struct Type_c<void> {
-			using type = T;
+			using type = void;
 			using Self = el::Type_c<type>;
 
 			constexpr Type_c() noexcept = default;
 
-			constexpr bool operator==(el::Type_c<T>)		const noexcept { return true; }
-			constexpr bool operator==(el::Type_c<T> const &)	const noexcept { return true; }
-			constexpr bool operator==(el::Type_c<T>&&)		const noexcept { return true; }
+			constexpr bool operator==(el::Type_c<void>)		const noexcept { return true; }
+			constexpr bool operator==(el::Type_c<void> const &)	const noexcept { return true; }
+			constexpr bool operator==(el::Type_c<void>&&)		const noexcept { return true; }
 
 			template<typename U>
 			constexpr bool operator==(el::Type_c<U>)		const noexcept { return false; }
