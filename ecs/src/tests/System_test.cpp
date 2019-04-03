@@ -79,7 +79,7 @@ TEST(SystemTest, ImageAndSignature) {
 	std::vector<test::EmptyManager::Handle> ehds;
 	std::vector<test::FullManager::Handle> fhds;
 	size_t count = 25;
-	const callback = [](auto &&ent, auto &&str) {
+	const auto callback = [](auto &&ent, auto &&str) {
 		str += ent[comp::string];
 	};
 	auto spec = ecs::SystemSpecs{callback}.instantiateWith(el::type_c<string>);
