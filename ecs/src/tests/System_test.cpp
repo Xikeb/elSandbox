@@ -79,6 +79,7 @@ TEST(SystemTest, ImageAndSignature) {
 	std::vector<test::EmptyManager::Handle> ehds;
 	std::vector<test::FullManager::Handle> fhds;
 	size_t count = 25;
+	
 	const auto callback = [](auto &&ent, auto &&str) {
 		str += ent[comp::string];
 	};
@@ -87,7 +88,7 @@ TEST(SystemTest, ImageAndSignature) {
 	auto &&esys = spec(""); (void) esys;
 	while(count--) {
 	     ehds.push_back(emgr.createEntity());
-	     fhds.push_back(fmgr.createEntity().addComponent(comp::string, static_cast<char>(count)));
+	     fhds.push_back(fmgr.createEntity().addComponent(comp::string, std::to_string(count)));
 	 }
 }
 
