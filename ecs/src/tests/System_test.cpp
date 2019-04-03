@@ -87,7 +87,7 @@ TEST(SystemTest, ImageAndSignature) {
 	auto &&esys = spec(""); (void) esys;
 	while(count--) {
 	     ehds.push_back(emgr.createEntity());
-	     fhds.push_back(vmgr.createEntity().addComponent(comp::string, static_cast<char>(count)));
+	     fhds.push_back(fmgr.createEntity().addComponent(comp::string, static_cast<char>(count)));
 	 }
 }
 
