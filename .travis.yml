@@ -13,4 +13,6 @@ addons:
       - gcc-8
       - clang-8
       - libgtest-dev
-script: cd ecs/ && g++ -v && make test
+script:
+  - cd ecs/
+  g++ -v
