@@ -83,11 +83,11 @@ TEST(SystemTest, ImageAndSignature) {
 		str += ent[comp::string];
 	};
 	auto spec = ecs::SystemSpecs{callback}.instantiateWith(el::type_c<std::string>);
-	auto &&fsys = spec("");
-	auto &&esys = spec("");
+	auto &&fsys = spec(""); (void) fsys;
+	auto &&esys = spec(""); (void) esys;
 	while(count--) {
 	     ehds.push_back(emgr.createEntity());
-	     vhds.push_back(vmgr.createEntity().addComponent(comp::string, static_cast<char>(count)));
+	     fhds.push_back(vmgr.createEntity().addComponent(comp::string, static_cast<char>(count)));
 	 }
 }
 
