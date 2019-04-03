@@ -10,7 +10,7 @@
 			using Self = el::Type_c<type>;
 
 			constexpr Type_c() = default;
-			constexpr Type_c(T const &, el::enable_if_v<!std::is_void_v<T>, void *> = 0) {}
+			constexpr Type_c(el::enable_if_t<!std::is_void_v<T>, T const &> = 0) {}
 
 			constexpr bool operator==(el::Type_c<T>)
 			{
