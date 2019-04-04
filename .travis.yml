@@ -20,7 +20,7 @@ script:
   - cd /usr/src/gtest/build
   - ls -la ..
   - sudo cmake ..
-  - -tree -if ..
+  - tree -if ..
   - sudo ln -s *.a /usr/lib
   - cd -
   - echo $LD_LIBRARY_PATH
