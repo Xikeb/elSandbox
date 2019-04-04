@@ -32,4 +32,4 @@ script:
   - cd ecs
   #Get compiler version
   - make test -k -j
-  - g++ -v ./src/tests/System_test.cpp
+  - g++ -v -std=c++1z ./src/tests/Entity_test.o ./src/tests/EntityHandle_test.o ./src/tests/Manager_test.o ./src/tests/System_test.o -o unit-tester -lpthread -lgtest -lgtest_main
