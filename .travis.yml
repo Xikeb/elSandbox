@@ -10,9 +10,6 @@ addons:
     packages:
       - cmake
       - g++-8
-      - clang++-8
-      - gcc-8
-      - clang-8
       - libgtest-dev
       - build-essential
 script:
@@ -22,7 +19,7 @@ script:
   - cd /usr/src/gtest
   - ls -la
   - sudo cmake .
-  - ls -la CMakeFiles/gtest.dir CMakeFiles/gtest_main.dir
+  - -tree -if
   - sudo ln -s *.a /usr/lib
   - cd -
   - echo $LD_LIBRARY_PATH
@@ -33,4 +30,3 @@ script:
   - cd ecs
   #Get compiler version
   - make test -k -j
-  - g++ -v -std=c++1z ./src/tests/Entity_test.o ./src/tests/EntityHandle_test.o ./src/tests/Manager_test.o ./src/tests/System_test.o -o unit-tester -lpthread -lgtest -lgtest_main
