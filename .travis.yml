@@ -16,6 +16,9 @@ addons:
 script:
   # Install libgtest if it didn't work the first time
   - sudo apt-get install libgtest-dev
+  - cd /usr/src/gtest
+  - sudo cmake .
+  - sudo ln -s *.a /usr/lib
    # Link gcc-6 and g++-6 to their standard commands
   - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
