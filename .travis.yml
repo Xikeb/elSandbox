@@ -2,18 +2,6 @@ dist: trusty
 sudo: required
 language: cpp
 compiler: gcc
-before_install:
-  # Install libgtest if it didn't work the first time
-  - sudo apt-get install cmake libgtest-dev build-essential
-  # Export CC and CXX to tell cmake which compiler to use
-  - export CC=/usr/bin/gcc-8
-  - export CXX=/usr/bin/g++-8
-  - cd /usr/src/gtest
-  - ls -la
-  - sudo cmake .
-  - ls -la
-  - sudo ln -s *.a /usr/lib
-  - cd -
 addons:
   apt:
     sources:
@@ -26,13 +14,20 @@ addons:
       - gcc-8
       - clang-8
       - libgtest-dev
+      - build-essential
 script:
-  # Link gcc-6 and g++-6 to their standard commands
-  - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
-  - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
   # Export CC and CXX to tell cmake which compiler to use
   - export CC=/usr/bin/gcc-8
   - export CXX=/usr/bin/g++-8
+  - cd /usr/src/gtest
+  - ls -la
+  - sudo cmake .
+  - ls -la
+  - sudo ln -s *.a /usr/lib
+  - cd -
+  # Link gcc-6 and g++-6 to their standard commands
+  - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
+  - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
   # Go to working directory
   - cd ecs
   #Get compiler version
