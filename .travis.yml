@@ -22,8 +22,8 @@ script:
   # Build and intall GTest libraries
   - sudo mkdir /usr/src/gtest/build -p
   - cd /usr/src/gtest/build
-  - cmake ..
-  - make
+  - sudo cmake ..
+  - sudo make
   - sudo cp *.a /usr/local/lib
   - cd -
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
