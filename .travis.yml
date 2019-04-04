@@ -33,5 +33,6 @@ script:
   # Go to working directory
   - cd ecs
   #Get compiler version
-  - make test -k -j
-  - ld --verbose -L/usr/local/lib -lgtest -lgtest_main
+  - sudo make test -k -j
+  - sudo ld --verbose -L/usr/local/lib -lgtest -lgtest_main
+  - sudo locate libgtest.a libgtest_main.a
