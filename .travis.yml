@@ -30,3 +30,5 @@ script:
   # Go to working directory
   - cd ecs
   - sudo make test -k -j
+  - ./unit-tester
+  - echo Exit status: $?
