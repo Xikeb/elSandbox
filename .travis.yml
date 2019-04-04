@@ -35,5 +35,6 @@ script:
   - cd ecs
   #Get compiler version
   - sudo make test -k -j
-  - sudo ld --verbose -lpthread -L/usr/local/lib -lgtest -lgtest_main
+  - sudo ld --verbose -L/usr/local/lib -lgtest -lgtest_main -lpthread 
+  - sudo updatedb
   - sudo locate libgtest.a libgtest_main.a pthread.so
