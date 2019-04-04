@@ -22,7 +22,7 @@ script:
   - sudo cmake ..
   - sudo make
   - echo *.a
-  - sudo ln -s *.a /usr/local/lib
+  - sudo cp *.a /usr/local/lib
   - ls -la /usr/local/lib/libgtest*
   - cd -
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
