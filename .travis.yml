@@ -24,6 +24,7 @@ script:
   - echo *.a
   - sudo cp *.a /usr/local/lib
   - ls -la /usr/local/lib/libgtest*
+  - cat /usr/local/lib/libgtest.a
   - cd -
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   - echo $LD_LIBRARY_PATH
@@ -34,5 +35,5 @@ script:
   - cd ecs
   #Get compiler version
   - sudo make test -k -j
-  - sudo ld --verbose -L/usr/local/lib -lgtest -lgtest_main
-  - sudo locate libgtest.a libgtest_main.a
+  - sudo ld --verbose -lpthread -L/usr/local/lib -lgtest -lgtest_main
+  - sudo locate libgtest.a libgtest_main.a pthread.so
