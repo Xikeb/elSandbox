@@ -35,7 +35,7 @@ CPPFLAGS	=	-I ./include/ -I../ #-DNDEBUG
 CPPFLAGS	+=	-W -Wall -Wextra -Werror
 
 LDFLAGS		=
-TESTLDFLAGS	=	-lpthread -lgtest -lgtest_main
+TESTLDFLAGS	=	-lpthread -L /usr/local/lib -lgtest -lgtest_main
 
 all: debug test
 
