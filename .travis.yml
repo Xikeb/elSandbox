@@ -20,6 +20,8 @@ script:
   - cd /usr/src/gtest/build
   - ls -la ..
   - sudo cmake ..
+  - sudo make
+  - sudo make install
   - sudo ls -Rla ..
   - sudo ln -s *.a /usr/lib
   - cd -
