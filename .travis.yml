@@ -22,7 +22,7 @@ script:
   - cd /usr/src/gtest
   - ls -la
   - sudo cmake .
-  - ls -la
+  - ls -la . cmake/ CMakeFiles/
   - sudo ln -s *.a /usr/lib
   - cd -
   # Link gcc-6 and g++-6 to their standard commands
