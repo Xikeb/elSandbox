@@ -16,11 +16,11 @@ script:
   # Export CC and CXX to tell cmake which compiler to use
   - export CC=/usr/bin/gcc-8
   - export CXX=/usr/bin/g++-8
-  - mkdir /usr/src/gtest/build -p
+  - sudo mkdir /usr/src/gtest/build -p
   - cd /usr/src/gtest/build
   - ls -la ..
   - sudo cmake ..
-  - tree -if ..
+  - sudo tree -if ..
   - sudo ln -s *.a /usr/lib
   - cd -
   - echo $LD_LIBRARY_PATH
