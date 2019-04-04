@@ -23,6 +23,7 @@ script:
   - sudo make
   - sudo make install
   - sudo ls -Rla ..
+  - echo *.a
   - sudo ln -s *.a /usr/lib
   - cd -
   - echo $LD_LIBRARY_PATH
