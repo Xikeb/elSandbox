@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <memory>
+#include <utility>
 #include <type_traits>
 
 #include "el/static_if.hpp"
@@ -18,27 +19,41 @@ namespace ecs {
 	namespace impl {
 		template<typename T>
 		struct SystemImage {
-			using value_type = T;
+			using ValueType = T;
 			using Storage = el::conditional_t<
 				std::is_scalar<T>::value,
-				value_type,
-				std::aligned_storage_t<sizeof(value_type), alignof(value_type)>
+				ValueType,
+				std::aligned_storage_t<sizeof(ValueType), alignof(ValueType)>
 			>;
-			Storage storage;
-			constexpr operator value_type &() noexcept { return reinterpret_cast<T&>(this->storage); }
-			constexpr operator value_type const &() const noexcept { return reinterpret_cast<T const &>(this->storage); }
 
-			SystemImage(value_type const &v) { this->construct(v); }
-			SystemImage(value_type &&v) { this->construct(std::move(v)); }
+			SystemImage(ValueType const &v)
+			{
+				this->construct(v);
+			}
+
+			SystemImage(ValueType &&v)
+			{
+				this->construct(std::move(v));
+			}
+
 			template<typename ...Args>
-			SystemImage(Args&&... args) { this->construct(std::forward<Args>(args)...); }
+			SystemImage(Args&&... args)
+			{
+				this->construct(std::forward<Args>(args)...);
+			}
+
+			constexpr operator ValueType &() 		noexcept 		{ return reinterpret_cast<T&>(this->storage); }
+			constexpr operator ValueType const &() 	const noexcept 	{ return reinterpret_cast<T const &>(this->storage); }
 
 			template<typename ...Args>
 			void construct(Args&&... args) noexcept(noexcept(T(std::declval<Args>()...)))
 			{
 				new (static_cast<void *>(std::addressof(this->storage))) T(std::forward<Args>(args)...);
 			}
+
+			Storage storage;
 		};
+
 		template<>
 		struct SystemImage<void> {};
 	} // impl

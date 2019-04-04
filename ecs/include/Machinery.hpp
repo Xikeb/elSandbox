@@ -19,6 +19,13 @@ namespace ecs {
 		using Settings = TSettings;
 		using Manager = ecs::Manager<Settings>;
 		using Specifications = el::type_list<Specs...>;
+
+		template<typename Spec>
+		using SystemStorage = std::aligned_storage_t<
+			sizeof(typename Spec::System),
+			alignof(typename Spec::System)
+		>;
+
 		using AutomaticSystems = Specifications::filter([](auto &&spec){
 			return !el::is_same<
 				typename TYPE_OF(+spec)::System::Signature,
@@ -26,7 +33,7 @@ namespace ecs {
 			>{};
 		});
 
-		template<Spec>
+		template<typename Spec>
 		constexpr static size_t systemId = Specifications::template IndexOf<Spec>::value;
 
 		static_assert(
@@ -40,7 +47,7 @@ namespace ecs {
 			);
 		});
 
-		Machinery(Manager const &mgr): manager(mgr)
+		Machinery(Manager const &mgr): manager(mgr), constructed(0)
 		{
 		}
 
@@ -57,7 +64,7 @@ namespace ecs {
 		}
 
 		template<typename Spec>
-		auto &getSystem(Spec) const noexcept
+		auto const &getSystem(Spec) const noexcept
 		{
 			static_assert(
 				Specifications::template Contains<Spec>::value,
@@ -123,18 +130,13 @@ namespace ecs {
 		}
 
 		Manager &manager;
-		std::tuple<
-			std::aligned_storage_t<
-				sizeof(typename Specs::System),
-				alignof(typename Specs::System)
-			>...
-		> systems;
-		std::bitset<sizeof(Specs)...> constructed;
+		std::tuple<SystemStorage<Specs>...> systems;
+		std::bitset<sizeof...(Specs)> constructed;
 	};
 
 	template<typename TSettings, typename ...Specs>
-	ecs::Machinery(ecs::Manager<TSettings>, Specs...) -> ecs::Machinery<TSettings, Specs...>;
+	ecs::Machinery(ecs::Manager<TSettings>, Specs const &...) -> ecs::Machinery<TSettings, Specs...>;
 
 	template<typename TSettings, typename ...Specs>
-	ecs::Machinery(ecs::Manager<TSettings>, Specs const &...) -> ecs::Machinery<TSettings, Specs...>;
+	ecs::Machinery(ecs::Manager<TSettings>, Specs...) -> ecs::Machinery<TSettings, Specs...>;
 } // ecs
