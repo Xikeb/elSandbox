@@ -21,11 +21,11 @@ script:
   - ls -la ..
   - sudo cmake ..
   - sudo make
-  - sudo make install
   - sudo ls -Rla ..
   - echo *.a
-  - sudo ln -s *.a /usr/lib
+  - sudo ln -s *.a /usr/local/lib
   - cd -
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   - echo $LD_LIBRARY_PATH
   # Link gcc-6 and g++-6 to their standard commands
   - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
