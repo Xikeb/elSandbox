@@ -22,9 +22,10 @@ script:
   - cd /usr/src/gtest
   - ls -la
   - sudo cmake .
-  - ls -la . cmake/ CMakeFiles/
+  - ls -la CMakeFiles/gtest.dir CMakeFiles/gtest_main.dir
   - sudo ln -s *.a /usr/lib
   - cd -
+  - echo $LD_LIBRARY_PATH
   # Link gcc-6 and g++-6 to their standard commands
   - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
