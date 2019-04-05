@@ -58,7 +58,7 @@ TEST(SystemTest, SignatureMatch) {
 	auto &&sysMatching = spec.matching(el::type_c<test::HasString>)();
 	auto &&sysManual = spec.matching(el::type_c<void>)();
 
-	size_t ecount = 0; fcount = 0;
+	size_t ecount = 0, fcount = 0;
 	for (size_t i = 0; i < count; ++i) {
 		emgr.createEntity(); ++ecount;
 

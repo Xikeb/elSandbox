@@ -122,7 +122,7 @@ inline auto &debug_log(T const &t, std::string const &label = "") noexcept(noexc
 				<< std::setw(w) << "]: " 
 		;
 	}
-	return std::cout << label << std::endl;
+	return std::cout << t << std::endl;
 }
 
 template<typename T, typename ...Args>
