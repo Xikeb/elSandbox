@@ -31,4 +31,3 @@ script:
   - cd ecs
   - sudo make test -k -j
   - ./unit-tester
-  - echo "Exit status:" $?
