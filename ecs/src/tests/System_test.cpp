@@ -62,7 +62,7 @@ TEST(SystemTest, SignatureMatch) {
 	for (size_t i = 0; i < count; ++i) {
 		emgr.createEntity(); ++ecount;
 
-		if (count % 3 == 0) {
+		if (i % 3 == 0) {
 			fmgr.createEntity().addComponent(comp::string); ++fcount;
 		} else
 			fmgr.createEntity();

@@ -118,7 +118,8 @@ inline auto &debug_log(T const &t, std::string const &label = "") noexcept(noexc
 	auto w = std::cout.width();
 	std::cout << text::blue;
 	if (label.length()) {
-		std::cout 	<< "[" << std::setw(10)
+		std::cout 	<< "[" << std::setw(10) 
+					<< label
 					<< std::setw(w) << "]: "
 		;
 	}
