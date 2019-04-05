@@ -56,7 +56,7 @@ TEST(SystemTest, SignatureMatch) {
 	};
 	auto spec = ecs::SystemSpecs{callback};
 	auto &&sysMatching = spec.matching(el::type_c<test::HasString>)();
-	auto &&sysManual = spec.matching(el::type_c<ecs::SignatureTrue>)();
+	auto &&sysManual = spec.matching(el::type_c<void>)();
 
 	size_t ecount = 0, fcount = 0;
 	for (size_t i = 0; i < count; ++i) {
@@ -71,7 +71,7 @@ TEST(SystemTest, SignatureMatch) {
 	census = 0;
 	debug_log(fcount, "fcount");
 	sysMatching(fmgr);
-	EXPECT_EQ(census, count/3 + 1);
+	EXPECT_EQ(census, count/3);
 	debug_log(census, "census");
 
 	census = 0;
