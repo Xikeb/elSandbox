@@ -116,10 +116,10 @@ template<typename T>
 inline auto &debug_log(T const &t, std::string const &label = "") noexcept(noexcept(std::cout << std::declval<std::string>()))
 {
 	auto w = std::cout.width();
+	std::cout << text::blue;
 	if (label.length()) {
-		std::cout << text::blue << "["
-				<< std::setw(10) << label
-				<< std::setw(w) << "]: " 
+		std::cout 	<< "[" << std::setw(10)
+					<< std::setw(w) << "]: "
 		;
 	}
 	return std::cout << t << std::endl;

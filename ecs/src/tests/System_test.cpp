@@ -72,11 +72,13 @@ TEST(SystemTest, SignatureMatch) {
 	debug_log(fcount, "fcount");
 	sysMatching(fmgr);
 	EXPECT_EQ(census, count/3 + 1);
+	debug_log(census, "census");
 
 	census = 0;
 	debug_log(ecount, "ecount");
 	sysManual(emgr);
 	EXPECT_EQ(census, count);
+	debug_log(census, "census");
 }
 
 TEST(SystemTest, ImageAndSignature) {
