@@ -56,7 +56,6 @@ TEST(SystemTest, SignatureMatch) {
 	};
 	auto spec = ecs::SystemSpecs{callback};
 	auto &&sysMatching = spec.matching(el::type_c<test::HasString>)();
-	auto &&sysManual = spec.matching(el::type_c<ecs::SigntatureTrue>)();
 
 	size_t ecount = 0, fcount = 0;
 	for (size_t i = 0; i < count; ++i) {
