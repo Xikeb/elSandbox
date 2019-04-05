@@ -103,6 +103,28 @@ namespace text {
 	static std::string reset = "\033[00m\033[m";
 } // text
 
+inline auto &debug_log(std::string const &label = "Debug") noexcept(noexcept(std::cout << std::declval<std::string>()))
+{
+	auto w = std::cout.width();
+	return (std::cout << text::blue << "["
+			<< std::setw(10) << label
+			<< "] " << std::setw(w)
+	);
+}
+
+template<typename T>
+inline auto &debug_log(T const &t, std::string const &label = "") noexcept(noexcept(std::cout << std::declval<std::string>()))
+{
+	auto w = std::cout.width();
+	if (label.length()) {
+		std::cout << text::blue << "["
+				<< std::setw(10) << label
+				<< std::setw(w) << "]: " 
+		;
+	}
+	return std::cout << label << std::endl;
+}
+
 template<typename T, typename ...Args>
 void benchmark(T&& callable, std::size_t reps = 1000, std::string label = "Tested function", Args&&...args) {
 	auto then = std::chrono::high_resolution_clock::now();
@@ -113,13 +135,4 @@ void benchmark(T&& callable, std::size_t reps = 1000, std::string label = "Teste
 	std::cout << text::blue << "[ Benchmark] " << label << ": "
 		  << std::fixed << std::setprecision(2) << diff.count()
 		  << "ms (" << reps << " reps)" << text::reset << std::endl;
-}
-
-inline auto &debug_log(std::string const &label = "Debug") noexcept(noexcept(std::cout << std::declval<std::string>()))
-{
-	auto w = std::cout.width();
-	return (std::cout << text::blue << "["
-			<< std::setw(10) << label
-			<< "] " << std::setw(w)
-	);
 }

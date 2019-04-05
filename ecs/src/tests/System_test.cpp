@@ -54,21 +54,27 @@ TEST(SystemTest, SignatureMatch) {
 	const static auto callback = [&census](auto&&) {
 		debug_log("NamedEntity"); ++census;
 	};
-
-	for (size_t i = 0; i < count; ++i) {
-		emgr.createEntity();
-		if (count % 3 == 0)
-			fmgr.createEntity().addComponent(comp::string);
-		else
-			fmgr.createEntity();
-	}
 	auto spec = ecs::SystemSpecs{callback};
 	auto &&sysMatching = spec.matching(el::type_c<test::HasString>)();
 	auto &&sysManual = spec.matching(el::type_c<void>)();
+
+	size_t ecount = 0; fcount = 0;
+	for (size_t i = 0; i < count; ++i) {
+		emgr.createEntity(); ++ecount;
+
+		if (count % 3 == 0) {
+			fmgr.createEntity().addComponent(comp::string); ++fcount;
+		} else
+			fmgr.createEntity();
+	}
+
 	census = 0;
+	debug_log(fcount, "fcount");
 	sysMatching(fmgr);
 	EXPECT_EQ(census, count/3 + 1);
+
 	census = 0;
+	debug_log(ecount, "ecount");
 	sysManual(emgr);
 	EXPECT_EQ(census, count);
 }
@@ -87,9 +93,9 @@ TEST(SystemTest, ImageAndSignature) {
 	auto &&fsys = spec(""); (void) fsys;
 	auto &&esys = spec(""); (void) esys;
 	while(count--) {
-	     ehds.push_back(emgr.createEntity());
-	     fhds.push_back(fmgr.createEntity().addComponent(comp::string, std::to_string(count)));
-	 }
+		ehds.push_back(emgr.createEntity());
+		fhds.push_back(fmgr.createEntity().addComponent(comp::string, std::to_string(count)));
+	}
 }
 
 // TEST(SystemTest, IntegerImage) {
