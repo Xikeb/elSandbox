@@ -54,9 +54,10 @@ TEST(SystemTest, SignatureMatch) {
 	const static auto callback = [&census](auto&&) {
 		debug_log("NamedEntity"); ++census;
 	};
-	auto spec = ecs::SystemSpecs{callback};
-	auto &&sysMatching = spec.matching(el::type_c<test::HasString>)();
-	auto &&sysManual = spec.matching(el::type_c<void>)();
+	auto &&sysMatching = ecs::SystemSpecs{callback}.matching<test::HasString>()();
+	auto &&sysManual = ecs::SystemSpecs{[](auto &&mgr){
+		mgr.forEntities(callback);
+	}}.manual()();
 
 	size_t ecount = 0, fcount = 0;
 	for (size_t i = 0; i < count; ++i) {

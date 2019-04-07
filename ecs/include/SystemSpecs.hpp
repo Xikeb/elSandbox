@@ -107,6 +107,12 @@ namespace ecs {
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, TNewSignature>(this->callback);
 		}
 
+		template<typename TNewSignature>
+		constexpr auto matching() const noexcept
+		{
+			return ecs::SystemSpecs<Callback, Dependencies, Instance, TNewSignature>(this->callback);
+		}
+
 		constexpr auto manual() const noexcept
 		{
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, void>(this->callback);

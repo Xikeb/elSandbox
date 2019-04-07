@@ -108,7 +108,7 @@ inline auto &debug_log(std::string const &label = "Debug") noexcept(noexcept(std
 	auto w = std::cout.width();
 	return (std::cout << text::blue << "["
 			<< std::setw(10) << label
-			<< "] " << std::setw(w)
+			<< "] " << text::reset << std::setw(w)
 	);
 }
 
@@ -119,8 +119,8 @@ inline auto &debug_log(T const &t, std::string const &label = "") noexcept(noexc
 	std::cout << text::blue;
 	if (label.length()) {
 		std::cout 	<< "[" << std::setw(10) 
-					<< label
-					<< std::setw(w) << "]: "
+					<< label << std::setw(w)
+					<< "]: " << text::reset
 		;
 	}
 	return std::cout << t << std::endl;
