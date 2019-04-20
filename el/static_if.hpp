@@ -12,14 +12,26 @@
 				{
 				}
 
-				template<typename F, typename ...Args>
-				constexpr auto then(F&&, Args&&...) const noexcept
+				template<typename F>
+				constexpr auto then(F&&) const noexcept
 				{
 					return *this;
 				}
 
-				template<typename F, typename ...Args>
-				constexpr auto otherwise(F&&, Args&&...) const noexcept
+				template<typename F>
+				constexpr auto otherwise(F&&) const noexcept
+				{
+					return *this;
+				}
+
+				template<bool NewValue>
+				constexpr auto elif() const noexcept
+				{
+					return *this;
+				}
+
+				template<bool NewValue>
+				constexpr auto elif(el::bool_c<NewValue>) const noexcept
 				{
 					return *this;
 				}
@@ -31,23 +43,23 @@
 				}
 			};
 
-			template<typename Callback>
-			constexpr auto make_staticIfResult(Callback &&c) noexcept
-			{
-				return StaticIfResult<Callback>(std::forward<Callback>(c));
-			}
-
 			//From Romeo Vittorio's static_if
 			template<bool Value>
 			struct StaticIf;
 
+			template<bool Value>
+			StaticIf(el::bool_c<Value>) -> StaticIf<Value>;
+
 			template<>
 			struct StaticIf<false> {
-				const bool value = false;
+				constexpr static bool value = false;
+
+				constexpr StaticIf() = default;
+				constexpr StaticIf(el::bool_c<value>) {}
 
 				constexpr operator bool() const noexcept
 				{
-					return false;
+					return value;
 				}
 
 				template<typename Callback>
@@ -56,10 +68,22 @@
 					return *this;
 				}
 
+				template<bool NewValue>
+				constexpr auto elif() const noexcept
+				{
+					return StaticIf{el::bool_c<NewValue>{}};
+				}
+
+				template<bool NewValue>
+				constexpr auto elif(el::bool_c<NewValue>) const noexcept
+				{
+					return StaticIf{el::bool_c<NewValue>{}};
+				}
+
 				template<typename Callback>
 				constexpr auto otherwise(Callback &&c) const noexcept
 				{
-					return make_staticIfResult(std::forward<Callback>(c));
+					return StaticIfResult{std::forward<Callback>(c)};
 				}
 
 				template<typename Lhs, typename Rhs>
@@ -67,21 +91,42 @@
 				{
 					return std::forward<Rhs>(rhs);
 				}
+
+				template<typename ...Args>
+				constexpr void operator()(Args&&...) const noexcept
+				{
+					//Nothing happens cuz no <otherwise> was used
+				}
 			};
 
 			template<>
 			struct StaticIf<true> {
-				const bool value = true;
+				constexpr static bool value = true;
+
+				constexpr StaticIf() = default;
+				constexpr StaticIf(el::bool_c<value>) {}
 
 				constexpr operator bool() const noexcept
 				{
-					return true;
+					return value;
 				}
 
 				template<typename Callback>
 				constexpr auto then(Callback &&c) const noexcept
 				{
-					return make_staticIfResult(std::forward<Callback>(c));
+					return StaticIfResult{std::forward<Callback>(c)};
+				}
+
+				template<bool NewValue>
+				constexpr auto elif() const noexcept
+				{
+					return *this;
+				}
+
+				template<bool NewValue>
+				constexpr auto elif(el::bool_c<NewValue>) const noexcept
+				{
+					return *this;
 				}
 
 				template<typename Callback>
@@ -94,6 +139,12 @@
 				constexpr auto ternary(Lhs &&lhs, Rhs &&) const noexcept
 				{
 					return std::forward<Lhs>(lhs);
+				}
+
+				template<typename ...Args>
+				constexpr void operator()(Args&&...) const noexcept
+				{
+					//Nothing happens cuz no <then> was used
 				}
 			};
 		} // impl
@@ -109,9 +160,5 @@
 		{
 			return el::impl::StaticIf<Value>();
 		}
-		// constexpr auto static_if(bool value) noexcept
-		// {
-		// 	return el::impl::StaticIf<value>();
-		// }
 	} // el
 #endif // ELMETA_STATIC_IF_HPP

@@ -64,15 +64,39 @@
 			using Filter = el::type_list<>;
 
 			using Shift = el::type_list<>;
-			template<typename ...T>
-			using Unshift = el::type_list<T...>;
-			template<typename ...T>
-			using Push = el::type_list<T...>;
+			template<typename ...Ts>
+			using Unshift = el::type_list<Ts...>;
+			template<typename ...Ts>
+			using Push = el::type_list<Ts...>;
 
 			template<typename TF, typename ...Args>
 			static auto for_each(TF&& f, Args&&...)
 			{
 				return std::move(f);
+			}
+
+			template<typename ...Ts>
+			constexpr auto push() const noexcept
+			{
+				return Self::template Push<Ts...>{};
+			}
+
+			template<typename TF, typename ...Args>
+			constexpr static auto every(TF&&, Args&&...)
+			{
+				return el::false_c{};
+			}
+
+			template<typename TF, typename ...Args>
+			constexpr static auto some(TF&&, Args&&...)
+			{
+				return el::true_c{};
+			}
+
+			template<typename TF, typename Acc, typename ...Args>
+			constexpr static auto reduce(TF&&, Acc&& acc, Args&&...)
+			{
+				return std::forward<Acc>(acc);
 			}
 		};
 
@@ -88,7 +112,7 @@
 			constexpr static std::size_t size = 1 + sizeof...(TRest);
 
 			template<typename T>
-			struct Contains: type_of<decltype(el::impl::contains<T>(el::type_c<Self>, 0))> {
+			struct Contains: TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0)) {
 			};
 
 			struct Has {
@@ -96,12 +120,12 @@
 				template<typename T>
 				constexpr auto operator()() const noexcept
 				{
-					return type_of<decltype(el::impl::contains<T>(el::type_c<Self>, 0))>();
+					return TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0))();
 				}
 				template<typename T>
 				constexpr auto operator()(el::Type_c<T>) const noexcept
 				{
-					return type_of<decltype(el::impl::contains<T>(el::type_c<Self>, 0))>();
+					return TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0))();
 				}
 			};
 
@@ -138,11 +162,11 @@
 				el::type_c<Self>
 			))>;*/
 			template<typename Cond>
-			using Filter = el::type_of<decltype(el::impl::filter(
+			using Filter = TYPE_OF(el::impl::filter(
 				el::type_c<el::type_list<>>,
 				el::type_c<Self>,
 				Cond{}
-			))>;
+			));
 
 			/*template<typename TF, typename Accu, typename ...Args>
 			auto reduce(TF&& callable, Accu&& accu = Accu(), Args&&... args)
@@ -184,7 +208,8 @@
 				return el::impl::some<Self>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
-					std::forward<Args>(args)...
+					std::forward<Args>(args)...,
+					int{}
 				);
 			}
 
@@ -195,7 +220,8 @@
 					el::size_c<size - 1>(),
 					std::forward<TF>(f),
 					std::forward<Acc>(acc),
-					std::forward<Args>(args)...
+					std::forward<Args>(args)...,
+					int{}
 				);
 			}
 		};

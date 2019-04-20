@@ -37,11 +37,11 @@ namespace ecs {
 
 		constexpr Signature()
 		{
-			Components::for_each([&](auto &e, auto &) {
-				this->_sto.template enableComponent<typename decltype(+e)::type>();
+			Components::for_each([&](auto &&e, auto &&) {
+				this->_sto.template enableComponent<TYPE_OF(e)>();
 			});
-			Tags::for_each([&](auto &e, auto &) {
-				this->_sto.template enableTag<typename decltype(+e)::type>();
+			Tags::for_each([&](auto &&e, auto &&) {
+				this->_sto.template enableTag<TYPE_OF(e)>();
 			});
 		}
 

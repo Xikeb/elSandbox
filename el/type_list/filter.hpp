@@ -23,11 +23,11 @@
 			) noexcept
 			{
 				return el::impl::filter<Filter>(
-					el::type_c<typename el::conditional<
-						f(el::type_c<THead>),
+					el::type_c<el::conditional_t<
+						decltype(f(el::type_c<THead>))::value,
 						el::type_list<Keep..., THead>,
 						el::type_list<Keep...>
-					>::type>,
+					>>,
 					el::type_c<el::type_list<TRest...>>,
 					std::forward<Filter>(f)
 				);

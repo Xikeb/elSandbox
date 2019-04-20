@@ -10,7 +10,7 @@
 			using Self = el::Type_c<type>;
 
 			constexpr Type_c() noexcept = default;
-			constexpr Type_c(T const &) {}
+			constexpr Type_c(T const &) noexcept {}
 
 			constexpr bool operator==(el::Type_c<T>)			const noexcept { return true; }
 			constexpr bool operator==(el::Type_c<T> const &)	const noexcept { return true; }

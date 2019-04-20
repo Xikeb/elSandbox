@@ -127,7 +127,7 @@ namespace ecs {
 		}
 
 		template<typename ...Args>
-		void constructImage(Args&&... args) const noexcept
+		void constructImage(Args&&...) const noexcept
 		{
 			static_assert(sizeof...(Args) && !sizeof...(Args), "No Image to construct.");
 		}
@@ -170,7 +170,7 @@ namespace ecs {
 		}
 
 		template<typename ...Args>
-		void constructImage(Args&&... args) const noexcept
+		void constructImage(Args&&...) const noexcept
 		{
 			static_assert(sizeof...(Args) && !sizeof...(Args), "No Image to construct.");
 		}

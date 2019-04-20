@@ -4,7 +4,7 @@
 namespace el {
 	namespace impl {
 		template<typename TList, typename TF, typename ...Args>
-		constexpr bool some(el::size_c<(TList::size - 1)> i, TF&& f, Args&&... args)
+		constexpr bool some(el::size_c<(TList::size - 1)> i, TF&& f, Args&&... args, int = 0)
 		{
 			return f(
 				el::type_c<typename TList::template At<(TList::size - 1)>>,
@@ -13,7 +13,7 @@ namespace el {
 		}
 
 		template<typename TList, std::size_t Idx, typename TF, typename ...Args>
-		constexpr bool some(el::size_c<Idx> i, TF&& f, Args&&... args)
+		constexpr bool some(el::size_c<Idx> i, TF&& f, Args&&... args, ...)
 		{
 			if (f(
 				el::type_c<typename TList::template At<Idx>>,
@@ -23,7 +23,8 @@ namespace el {
 			return some<TList>(
 				el::size_c<Idx + 1>(),
 				std::forward<TF>(f),
-				std::forward<Args>(args)...
+				std::forward<Args>(args)...,
+				int{}
 			);
 		}
 	} // impl

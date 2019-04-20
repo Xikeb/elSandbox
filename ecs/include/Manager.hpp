@@ -104,7 +104,8 @@ namespace ecs {
 			auto capa = this->_capacity;
 			auto nCapa = capa + (1 + addition / 128u) * 128;
 
-			Settings::ComponentList::for_each([this, nCapa](auto &, auto &id) {
+			Settings::ComponentList::for_each([this, nCapa](auto, auto id) {
+				static_assert(el::is_same_v<decltype(id()), size_t>);
 				std::get<id()>(this->_componentStorage).reserve(nCapa);
 			});
 			entitiesSto.reserve(nCapa);
@@ -130,9 +131,9 @@ namespace ecs {
 
 		void killEntity(ecs::HandleDataIdx dataIdx) noexcept
 		{
-			Settings::ComponentList::for_each([&](auto &e, auto &) {
-				if (this->template hasComponent<typename decltype(+e)::type>(dataIdx))
-					this->template removeComponent<typename decltype(+e)::type>(dataIdx);
+			Settings::ComponentList::for_each([&](auto e, auto) {
+				if (this->template hasComponent<TYPE_OF(e)>(dataIdx))
+					this->template removeComponent<TYPE_OF(e)>(dataIdx);
 			});
 			this->_entities[this->_handleData[dataIdx].entityPosition].kill();
 		}

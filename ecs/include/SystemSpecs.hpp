@@ -27,6 +27,42 @@ namespace ecs {
 				using Callback = el::remove_cvref_t<decltype(callback)>;
 			};
 		};
+
+		namespace config {
+			template<typename ...Ts>
+			struct Dependencies;
+
+			template<typename ...Ts>
+			constexpr static auto reducedDependencies = el::type_list<Ts...>::reduce([](auto deps, auto element) {
+				using Element = TYPE_OF(element); 	//raw decltype() of the current element
+
+				el::static_if(el::is_similar<Dependencies, Element>{})
+					.then([](auto deps, auto element) {
+						return el::type_c<
+							decltype(deps)::template Push<TYPE_OF(element)::Types>
+						>;
+					})
+				.elif(el::is_similar<el::type_list, Element>{})
+					.then([](auto deps, auto element) {
+						return el::type_c<el::Rename<
+							decltype(deps)::template Push,
+							TYPE_OF(element)
+						>>;
+					})
+				.otherwise([](auto deps, auto element) {
+					return el::type_c<decltype(deps)::template Push<TYPE_OF(element)>>;
+				})(deps, element);
+			}, el::type_list<>{});
+
+			template<typename ...Ts>
+			struct Dependencies {
+				using Types = decltype(reducedDependencies<Ts...>);
+
+				constexpr Dependencies() noexcept = default;
+				constexpr Dependencies(el::Type_c<el::type_list<Ts...>>) noexcept {}
+				constexpr Dependencies(Ts&&...) noexcept {}
+			}; //struct Dependencies
+		} // config
 	} // impl
 
 	template<typename FCallback = void(void),
