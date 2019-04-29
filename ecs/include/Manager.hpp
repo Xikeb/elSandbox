@@ -251,7 +251,7 @@ namespace ecs {
 				auto &e = et[i];
 				if (e.alive()) {
 					auto h = Handle(*this, e.hdIndex, hdt[e.hdIndex].phase);
-					f(h, std::forward<Args>(args)...);
+					std::forward<F>(f)(h, std::forward<Args>(args)...);
 				}
 			}
 		}
@@ -267,7 +267,7 @@ namespace ecs {
 				auto &e = et[i];
 				if (e.alive() && e.matchesSignature(TSig{})) {
 					auto h = Handle(*this, e.hdIndex, hdt[e.hdIndex].phase);
-					f(h, std::forward<Args>(args)...);
+					std::forward<F>(f)(h, std::forward<Args>(args)...);
 				}
 			}
 		}
@@ -283,7 +283,7 @@ namespace ecs {
 				auto &e = et[i];
 				if (e.alive() && e.matchesSignature(s)) {
 					auto h = Handle(*this, e.hdIndex, hdt[e.hdIndex].phase);
-					f(h, std::forward<Args>(args)...);
+					std::forward<F>(f)(h, std::forward<Args>(args)...);
 				}
 			}
 		}

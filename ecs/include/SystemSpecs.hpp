@@ -27,42 +27,6 @@ namespace ecs {
 				using Callback = el::remove_cvref_t<decltype(callback)>;
 			};
 		};
-
-		namespace config {
-			template<typename ...Ts>
-			struct Dependencies;
-
-			template<typename ...Ts>
-			constexpr static auto reducedDependencies = el::type_list<Ts...>::reduce([](auto deps, auto element) {
-				using Element = TYPE_OF(element); 	//raw decltype() of the current element
-
-				el::static_if(el::is_similar<Dependencies, Element>{})
-					.then([](auto deps, auto element) {
-						return el::type_c<
-							decltype(deps)::template Push<TYPE_OF(element)::Types>
-						>;
-					})
-				.elif(el::is_similar<el::type_list, Element>{})
-					.then([](auto deps, auto element) {
-						return el::type_c<el::Rename<
-							decltype(deps)::template Push,
-							TYPE_OF(element)
-						>>;
-					})
-				.otherwise([](auto deps, auto element) {
-					return el::type_c<decltype(deps)::template Push<TYPE_OF(element)>>;
-				})(deps, element);
-			}, el::type_list<>{});
-
-			template<typename ...Ts>
-			struct Dependencies {
-				using Types = decltype(reducedDependencies<Ts...>);
-
-				constexpr Dependencies() noexcept = default;
-				constexpr Dependencies(el::Type_c<el::type_list<Ts...>>) noexcept {}
-				constexpr Dependencies(Ts&&...) noexcept {}
-			}; //struct Dependencies
-		} // config
 	} // impl
 
 	template<typename FCallback = void(void),
@@ -104,25 +68,29 @@ namespace ecs {
 		}
 
 		constexpr explicit SystemSpecs(el::remove_ref_t<Callback> &&f): callback(std::move(f))
-		/*options(
-			el::make_pair(Settings::dependency, el::type_c<Dependencies>),
-			el::make_pair(Settings::instance, el::type_c<Instance>),
-			el::make_pair(Settings::signature, el::type_c<Signature>),
-			el::make_pair(Settings::callback, std::forward<Callback>(f))
-		)*/
 		{
 		}
 
-		template<typename T>
-		constexpr auto instantiateWith(el::Type_c<T>) const noexcept
+		template<typename Image>
+		constexpr auto instantiateWith(el::Type_c<Image>) const noexcept
 		{
-			return ecs::SystemSpecs<Callback, Dependencies, T, Signature>(this->callback);
+			return ecs::SystemSpecs<
+				Callback,
+				Dependencies,
+				Image,
+				Signature
+			>(this->callback);
 		}
 
-		template<typename T>
+		template<typename Image>
 		constexpr auto instantiateWith() const noexcept
 		{
-			return ecs::SystemSpecs<Callback, Dependencies, T, Signature>(this->callback);
+			return ecs::SystemSpecs<
+				Callback,
+				Dependencies,
+				Image,
+				Signature
+			>(this->callback);
 		}
 
 		template<typename F>
@@ -134,24 +102,35 @@ namespace ecs {
 		template<typename ...Requirements>
 		constexpr auto after(el::Type_c<el::type_list<Requirements...>>) const noexcept
 		{
-			return ecs::SystemSpecs<Callback, typename Dependencies::template Push<Requirements...>, Instance, Signature>(this->callback);
+			return ecs::SystemSpecs<
+				Callback,
+				typename Dependencies::template Push<Requirements...>,
+				Instance,
+				Signature
+			>(this->callback);
 		}
 
-		template<typename TNewSignature>
-		constexpr auto matching(el::Type_c<TNewSignature>) const noexcept
+		template<typename TSig>
+		constexpr auto matching(el::Type_c<TSig>) const noexcept
 		{
-			return ecs::SystemSpecs<Callback, Dependencies, Instance, TNewSignature>(this->callback);
+			return ecs::SystemSpecs<Callback, Dependencies, Instance, TSig>(this->callback);
 		}
 
-		template<typename TNewSignature>
-		constexpr auto matching() const noexcept
+		template<typename TSig>
+		constexpr auto matching() const noexcept //Write entire system eecution yourself
 		{
-			return ecs::SystemSpecs<Callback, Dependencies, Instance, TNewSignature>(this->callback);
+			return ecs::SystemSpecs<Callback, Dependencies, Instance, TSig>(this->callback);
 		}
 
 		constexpr auto manual() const noexcept
 		{
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, void>(this->callback);
+		}
+
+		template<typename ...Args>
+		constexpr auto system(Args&&... args) const noexcept
+		{
+			return System(this->callback, std::forward<Args>(args)...);
 		}
 
 		template<typename ...Args>

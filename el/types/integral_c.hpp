@@ -8,13 +8,11 @@
 
 #define ENABLE_IF_HAS_UNOP(sign, name)														\
 	constexpr static auto op_##name = [](auto &&a) { return sign(a); };						\
-	template<typename T, T t>																\
-	constexpr auto operator sign(el::integral_c<T, t>) noexcept;							\
 	template<typename T, T t, typename = el::void_t<										\
 		decltype(op_##name(std::declval<T&>()))												\
 	>> constexpr auto operator sign(el::integral_c<T, t>) noexcept							\
 	{																						\
-		auto v = t;																			\
+		constexpr auto v = t;																\
 		return el::integral_c<decltype(sign(v)), sign(v)>{};								\
 	}
 

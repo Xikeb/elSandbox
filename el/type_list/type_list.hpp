@@ -42,17 +42,11 @@
 			using Contains = el::false_c;
 
 			struct Has {
-				constexpr Has() = default;
 				template<typename T>
-				constexpr auto operator()() const noexcept
-				{
-					return el::false_c{};
-				}
+				constexpr auto operator()() const noexcept { return el::false_c{}; }
+
 				template<typename T>
-				constexpr auto operator()(el::Type_c<T>) const noexcept
-				{
-					return el::false_c{};
-				}
+				constexpr auto operator()(el::Type_c<T>) const noexcept { return el::false_c{}; }
 			};
 
 			constexpr static Has has{};

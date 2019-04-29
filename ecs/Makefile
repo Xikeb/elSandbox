@@ -23,10 +23,13 @@ OBJS		=	$(SRCS:.cpp=.o)
 TESTNAME	=	unit-tester
 
 TESTSRCSDIR	=	./src/tests
-TESTSRCS	=	$(TESTSRCSDIR)/Entity_test.cpp		\
-			$(TESTSRCSDIR)/EntityHandle_test.cpp	\
-			$(TESTSRCSDIR)/Manager_test.cpp		\
-			$(TESTSRCSDIR)/System_test.cpp
+TESTSRCS	=	$(TESTSRCSDIR)/Entity_test.cpp			\
+				$(TESTSRCSDIR)/Machinery_test.cpp		\
+				$(TESTSRCSDIR)/System_test.cpp 			\
+				$(TESTSRCSDIR)/EntityHandle_test.cpp	\
+				$(TESTSRCSDIR)/Manager_test.cpp			\
+				$(TESTSRCSDIR)/main_test.cpp
+
 # TESTSRCS	=	$(patsubst $(SRCSDIR)/%.cpp, $(TESTSRCSDIR)/%_test.cpp, $(SRCS))
 
 TESTOBJS	=	$(TESTSRCS:.cpp=.o)
@@ -47,7 +50,7 @@ debug:	CPPFLAGS += -s -Ofast
 debug:	$(NAME)
 
 test: CPPFLAGS += -s -Ofast
-# test: CPPFLAGS += -g3 -O0
+ # test: CPPFLAGS += -g3 -O0
 test: $(TESTOBJS)
 	 $(CXX) $(TESTOBJS) -o $(TESTNAME) $(TESTLDFLAGS)
 

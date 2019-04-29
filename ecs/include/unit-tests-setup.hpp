@@ -45,6 +45,26 @@ namespace test {
 		float z;
 	};
 
+	static inline Vector2f &left(Vector2f &v) { --v.x; return v; }
+	static inline Vector2i &left(Vector2i &v) { --v.x; return v; }
+	static inline Vector3f &left(Vector3f &v) { --v.x; return v; }
+	static inline Vector3i &left(Vector3i &v) { --v.x; return v; }
+
+	static inline Vector2f &right(Vector2f &v) { ++v.x; return v; }
+	static inline Vector2i &right(Vector2i &v) { ++v.x; return v; }
+	static inline Vector3f &right(Vector3f &v) { ++v.x; return v; }
+	static inline Vector3i &right(Vector3i &v) { ++v.x; return v; }
+
+	static inline Vector2f &up(Vector2f &v) { --v.y; return v; }
+	static inline Vector2i &up(Vector2i &v) { --v.y; return v; }
+	static inline Vector3f &up(Vector3f &v) { --v.y; return v; }
+	static inline Vector3i &up(Vector3i &v) { --v.y; return v; }
+
+	static inline Vector2f &down(Vector2f &v) { ++v.y; return v; }
+	static inline Vector2i &down(Vector2i &v) { ++v.y; return v; }
+	static inline Vector3f &down(Vector3f &v) { ++v.y; return v; }
+	static inline Vector3i &down(Vector3i &v) { ++v.y; return v; }
+
 	struct Transform {
 		Vector2f pos;
 		Vector2f rot;
@@ -120,10 +140,10 @@ inline auto &debug_log(T const &t, std::string const &label = "") noexcept(noexc
 	if (label.length()) {
 		std::cout 	<< "[" << std::setw(10) 
 					<< label << std::setw(w)
-					<< "]: " << text::reset
+					<< "]: "
 		;
 	}
-	return std::cout << t << std::endl;
+	return std::cout << t << text::reset << std::endl;
 }
 
 template<typename T, typename ...Args>

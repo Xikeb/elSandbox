@@ -51,9 +51,7 @@ TEST(SystemTest, SignatureMatch) {
 	test::FullManager fmgr;
 	size_t count = 30;
 	size_t census = 0;
-	const static auto callback = [&census](auto&&) {
-		debug_log("NamedEntity"); ++census;
-	};
+	const static auto callback = [&census](auto&&) { ++census; };
 	auto &&sysMatching = ecs::SystemSpecs{callback}.matching<test::HasString>()();
 	auto &&sysManual = ecs::SystemSpecs{[](auto &&mgr){
 		mgr.forEntities(callback);
@@ -70,17 +68,12 @@ TEST(SystemTest, SignatureMatch) {
 	}
 
 	census = 0;
-	debug_log(fcount, "fcount");
 	sysMatching(fmgr);
 	EXPECT_EQ(census, count/3);
-	debug_log(census, "census");
 
 	census = 0;
-	debug_log(ecount, "ecount");
-	debug_log(census, "census");
 	sysManual(emgr);
 	EXPECT_EQ(census, count);
-	debug_log(census, "census");
 }
 
 TEST(SystemTest, ImageAndSignature) {

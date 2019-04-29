@@ -55,37 +55,11 @@ namespace ecs {
 		};
 
 		template<>
-		struct SystemImage<void> {};
-	} // impl
-
-	namespace detail {
-		template<typename T, T t>
-		struct DependencyCounter {
-			using Self = DependencyCounter<T, t>;
-			using value_type = T;
-			static_assert(std::is_integral<value_type>::value, "Your value type may not be atomic-able.");
-
-			constexpr static value_type defaultValue = t;
-
-			std::atomic<value_type> count = t;
-			std::mutex m;
-			std::condition_variable cv;
-			std::array<
-				std::shared_ptr<Self>,
-				defaultValue
-			> dependents;
-
-			void ready() const noexcept { return this->count.load() == 0; }
-			void reset() noexcept { this->count = defaultValue; }
-			void decrement() noexcept
-			{
-				this->count.fetch_sub(1);
-				if (this->count.load() == 0)
-					for (auto &&dependent: this->dependents)
-						dependent.decrement();
-			}
+		struct SystemImage<void> {
+			using ValueType = void;
+			using Storage = void;
 		};
-	} // detail
+	} // impl
 
 	// Any Image class might have several constructors, and default might be only one of them,
 	// and any image scalar might be const/volatile,
