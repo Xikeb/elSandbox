@@ -12,7 +12,36 @@
 #include "System.hpp"
 #include "Manager.hpp"
 
-#define ECS_UNKNOWN_SPEC	"Those specifications do not represent a System of this Machine."
+#define ECS_UNKNOWN_SPEC		"Those specifications do not represent a System of this Machine."
+#define ECS_SPEC_OUT_OF_BOUNDS	"System index out of bounds."
+
+namespace ecs {
+	namespace impl {
+		template<typename Spec>
+		struct Chipset {
+			using type = Spec;
+			using System = decltype(std::declval<type>().system());
+			using Dependencies = typename Spec::Dependencies;
+			using SystemStorage = std::aligned_storage_t<
+				sizeof(SystemOf<Spec>),
+				alignof(SystemOf<Spec>)
+			>;
+
+			constexpr static size_t dependencyCount = Dependencies::size;
+
+			template<typename T, typename = el::enable_if_t<el::is_same_v<T, Spec>>>
+			constexpr auto const &get() const noexcept { return this->system; }
+
+			SystemStorage system;
+			size_t remainingDependencies;
+		};
+	} // impl
+
+	namespace impl {
+		template<typename T, typename ...Specs>
+		struct dependents {};
+	} // impl
+} // ecs
 
 namespace ecs {
 	template<typename TSettings, typename ...Specs>
@@ -22,16 +51,19 @@ namespace ecs {
 		using Manager = ecs::Manager<Settings>;
 		using Specifications = el::type_list<Specs...>;
 
+		template<typename T>
+		using SystemOf = decltype(std::declval<T>().system());
+
 		template<typename Spec>
 		using SystemStorage = std::aligned_storage_t<
-			sizeof(typename Spec::System),
-			alignof(typename Spec::System)
+			sizeof(SystemOf<Spec>),
+			alignof(SystemOf<Spec>)
 		>;
 
 		struct is_not_void {
 			template<typename T>
 			constexpr static auto value = !el::is_same<
-				typename T::System::Signature,
+				typename SystemOf<T>::Signature,
 				void
 			>{};
 
@@ -45,7 +77,7 @@ namespace ecs {
 		using AutomaticSystems = typename Specifications::template Filter<is_not_void>;
 
 		template<typename Spec>
-		constexpr static size_t systemId = Specifications::template IndexOf<Spec>::value;
+		constexpr static size_t specId = Specifications::template IndexOf<Spec>::value;
 		template<typename Spec>
 		constexpr static bool isOwnSpec = Specifications::template Contains<Spec>::value;
 
@@ -56,12 +88,15 @@ namespace ecs {
 			ecs::detail::is_settings<Settings>,
 			"Machinery requires ecs::Settings to be properly constructed."
 		);
+		/* Don't make that check as the clash of 2 specs with the same prototype and deps
+			can only be resolved by making a child class inherit from the spec in order to give it a new name
 		constexpr static auto isOnlySpecs = Specifications::for_each([](auto &&specs, auto&&){
 			static_assert(
 				ecs::detail::is_system_specs<TYPE_OF(specs)>,
 				"Each Specification must be an instance of the ecs::SystemSpecs template."
 			);
 		});
+		*/
 
 		constexpr Machinery(Manager &mgr) noexcept:
 		manager(mgr), constructed(0)
@@ -77,80 +112,64 @@ namespace ecs {
 		auto &getSystem(Spec) noexcept
 		{
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
-			return reinterpret_cast<typename Spec::System &>(
-				std::get< systemId<Spec> >(this->systems)
-			);
+			return this->system<Spec>();
 		}
 
 		template<typename Spec>
 		auto const &getSystem(Spec) const noexcept
 		{
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
-			return reinterpret_cast<typename Spec::System const &>(
-				std::get< systemId<Spec> >(this->systems)
-			);
+			return this->system<Spec>();
 		}
 
 		template<typename Spec>
 		auto &getSystem() noexcept
 		{
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
-			return reinterpret_cast<typename Spec::System &>(
-				std::get< systemId<Spec> >(this->systems)
-			);
+			return this->system<Spec>();
 		}
 
 		template<typename Spec>
-		auto &getSystem() const noexcept
+		auto const &getSystem() const noexcept
 		{
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
-			return reinterpret_cast<typename Spec::System const &>(
-				std::get< systemId<Spec> >(this->systems)
-			);
+			return this->system<Spec>();
 		}
 
 		template<size_t Id>
 		auto &getSystem() noexcept
 		{
-			static_assert(
-				Id < Specifications::size,
-				"System index out of bounds."
-			);
-
-			return reinterpret_cast<typename SpecById<Id>::System &>(
-				std::get<Id>(this->systems)
-			);
+			static_assert(Id < Specifications::size, ECS_SPEC_OUT_OF_BOUNDS);
+			return this->system<Spec>();
 		}
 
 		template<size_t Id>
-		auto &getSystem() const noexcept
+		auto const &getSystem() const noexcept
 		{
-			static_assert(
-				Id < Specifications::size,
-				"System index out of bounds."
-			);
-
-			return reinterpret_cast<typename SpecById<Id>::System const &>(
-				std::get<Id>(this->systems)
-			);
+			static_assert(Id < Specifications::size, ECS_SPEC_OUT_OF_BOUNDS);
+			return this->system<Spec>();
 		}
 
 		template<typename Spec, typename ...Args>
-		auto &construct(Spec const &spec, Args&&... args) noexcept(noexcept(std::declval<typename Spec::System>(std::declval<Args>()...)))
+		auto &construct(Spec const &spec, Args&&... args) noexcept(noexcept(std::declval<SystemOf<Spec>>(std::declval<Args>()...)))
 		{
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
-			auto &sys = reinterpret_cast<typename Spec::System &>(
-				std::get< systemId<Spec> >(this->systems)
-			);
+			auto &sys = this->system<Spec>();
 			
-			new (std::addressof(sys)) typename Spec::System(spec(std::forward<Args>(args)...));
-			this->constructed.set(systemId<Spec>);
+			new (std::addressof(sys)) SystemOf<Spec>(spec(std::forward<Args>(args)...));
+			this->constructed.set(specId<Spec>);
 			return sys;
 		}
 
 		Manager &manager;
 		std::bitset<sizeof...(Specs)> constructed;
 		std::tuple<SystemStorage<Specs>...> systems;
+
+	private:
+		template<typename T>
+		constexpr auto &system() const noexcept { return reinterpret_cast<SystemOf<T> &>(std::get<specId<T>>(this->systems));}
+		template<typename T>
+		constexpr auto const &system() const noexcept { return reinterpret_cast<SystemOf<T> const &>(std::get<specId<T>>(this->systems));}
 	};
 
 	template<typename TSettings, typename ...Specs>
@@ -159,3 +178,6 @@ namespace ecs {
 	// template<typename TSettings, typename ...Specs>
 	// Machinery(ecs::Manager<TSettings>, Specs...) -> Machinery<TSettings, Specs...>;
 } // ecs
+
+#undef ECS_UNKNOWN_SPEC
+#undef ECS_SPEC_OUT_OF_BOUNDS

@@ -136,7 +136,7 @@ namespace ecs {
 		template<typename ...Args>
 		constexpr auto operator()(Args&&... args) const noexcept
 		{
-			return System(this->callback, std::forward<Args>(args)...);
+			return this->system(std::forward<Args>(args)...);
 		}
 	};
 
