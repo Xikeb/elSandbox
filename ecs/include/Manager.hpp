@@ -22,10 +22,6 @@
 
 namespace ecs {
 	struct HandleData {
-		HandleData()
-		{
-		}
-
 		HandleData(ecs::EntityIdx entPos, int phase = 0):
 		entityPosition(entPos), phase(phase)
 		{
@@ -59,8 +55,7 @@ namespace ecs {
 		template<typename T>
 		constexpr static std::size_t tagId = Settings::TagList::template IndexOf<T>::value;
 
-		Manager()
-		{
+		Manager() {
 			this->enlarge(1000);
 		}
 
@@ -80,25 +75,21 @@ namespace ecs {
 		*/
 		std::size_t entityCount() const noexcept { return this->_size; }
 
-		ecs::HandleData const &getHandleData(ecs::HandleDataIdx hdIdx) noexcept
-		{
+		ecs::HandleData const &getHandleData(ecs::HandleDataIdx hdIdx) noexcept {
 			return this->_handleData[hdIdx];
 		}
 
-		Entity const &getEntity(ecs::HandleDataIdx dataIdx) const noexcept
-		{
+		Entity const &getEntity(ecs::HandleDataIdx dataIdx) const noexcept {
 			// std::cout << "GetConstantEntity" << std::endl;
 			return this->_entities[this->_handleData[dataIdx].entityPosition];
 		}
 
-		Entity &getEntity(ecs::HandleDataIdx dataIdx) noexcept
-		{
+		Entity &getEntity(ecs::HandleDataIdx dataIdx) noexcept {
 			// std::cout << "GetEntity" << std::endl;
 			return this->_entities[this->_handleData[dataIdx].entityPosition];
 		}
 
-		void enlarge(std::size_t addition)
-		{
+		void enlarge(std::size_t addition) {
 			auto &entitiesSto = this->_entities;
 			auto &hdSto = this->_handleData;
 			auto capa = this->_capacity;
@@ -117,8 +108,7 @@ namespace ecs {
 			this->_capacity = nCapa;
 		}
 
-		auto createEntity() noexcept
-		{
+		auto createEntity() noexcept {
 			auto size = this->_size;
 
 			if (size >= this->_capacity)
@@ -129,8 +119,7 @@ namespace ecs {
 			return h;
 		}
 
-		void killEntity(ecs::HandleDataIdx dataIdx) noexcept
-		{
+		void killEntity(ecs::HandleDataIdx dataIdx) noexcept {
 			Settings::ComponentList::for_each([&](auto e, auto) {
 				if (this->template hasComponent<TYPE_OF(e)>(dataIdx))
 					this->template removeComponent<TYPE_OF(e)>(dataIdx);
@@ -138,8 +127,7 @@ namespace ecs {
 			this->_entities[this->_handleData[dataIdx].entityPosition].kill();
 		}
 
-		void refresh() noexcept
-		{
+		void refresh() noexcept {
 			if (this->_size == 0)
 				return;
 			std::size_t iAlive = this->_size - 1;
@@ -164,8 +152,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		bool hasComponent(ecs::HandleDataIdx hdIdx) const noexcept
-		{
+		bool hasComponent(ecs::HandleDataIdx hdIdx) const noexcept {
 			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
@@ -174,8 +161,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		T& getComponent(ecs::HandleDataIdx hdIdx) noexcept
-		{
+		T& getComponent(ecs::HandleDataIdx hdIdx) noexcept {
 			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto entityPosition = this->_handleData[hdIdx].entityPosition;
 			auto &e = this->_entities[entityPosition];
@@ -185,8 +171,7 @@ namespace ecs {
 		}
 
 		template<typename T, typename ...Args>
-		T& addComponent(ecs::HandleDataIdx hdIdx, Args&&... args) noexcept
-		{
+		T& addComponent(ecs::HandleDataIdx hdIdx, Args&&... args) noexcept {
 			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto entityPosition = this->_handleData[hdIdx].entityPosition;
 			auto &e = this->_entities[entityPosition];
@@ -199,8 +184,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		void removeComponent(ecs::HandleDataIdx hdIdx) noexcept
-		{
+		void removeComponent(ecs::HandleDataIdx hdIdx) noexcept {
 			static_assert(isComponent<T>, "T isn't a Component according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
@@ -211,8 +195,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		bool hasTag(ecs::HandleDataIdx hdIdx) const noexcept
-		{
+		bool hasTag(ecs::HandleDataIdx hdIdx) const noexcept {
 			static_assert(isTag<T>, "T isn't a Tag according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
@@ -221,8 +204,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		void addTag(ecs::HandleDataIdx hdIdx) noexcept
-		{
+		void addTag(ecs::HandleDataIdx hdIdx) noexcept {
 			static_assert(isTag<T>, "T isn't a Tag according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
@@ -231,8 +213,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		void removeTag(ecs::HandleDataIdx hdIdx) noexcept
-		{
+		void removeTag(ecs::HandleDataIdx hdIdx) noexcept {
 			static_assert(isTag<T>, "T isn't a Tag according to the Settings.");
 			auto &e = this->_entities[this->_handleData[hdIdx].entityPosition];
 
@@ -241,8 +222,7 @@ namespace ecs {
 		}
 
 		template<typename F, typename ...Args>
-		void forEntities(F&& f, Args&&... args) noexcept
-		{
+		void forEntities(F&& f, Args&&... args) noexcept {
 			auto size = this->_size;
 			auto &hdt = this->_handleData;
 			auto &et = this->_entities;
@@ -257,8 +237,7 @@ namespace ecs {
 		}
 
 		template<typename TSig, typename F, typename ...Args>
-		void forEntitiesMatching(F&& f, Args&&... args) noexcept
-		{
+		void forEntitiesMatching(F&& f, Args&&... args) noexcept {
 			auto size = this->_size;
 			auto &hdt = this->_handleData;
 			auto &et = this->_entities;
@@ -273,8 +252,7 @@ namespace ecs {
 		}
 
 		template<typename TSig, typename F, typename ...Args>
-		void forEntitiesMatching(TSig&& s, F&& f, Args&&... args) noexcept
-		{
+		void forEntitiesMatching(TSig&& s, F&& f, Args&&... args) noexcept {
 			auto size = this->_size;
 			auto &hdt = this->_handleData;
 			auto &et = this->_entities;

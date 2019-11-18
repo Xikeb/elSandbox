@@ -4,7 +4,9 @@
 #include <iostream>
 #include <string>
 #include <type_traits>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
 #include "Scheduler.hpp"
 
@@ -80,7 +82,7 @@ namespace sys {
 			std::cout << std::endl;
 			++count;
 		};
-	auto print = ecs::makeSystem(printCallback)
+	auto print = ecs::SystemSpecs{printCallback}
 		.template instantiateWith<int>()
 		.after(el::type_c<el::type_list<>>)
 		.matching(el::type_c<test::HasString>)()
@@ -135,6 +137,6 @@ int main()
 	cout << endl << "Print system launch: " << endl;
 	sys::print(mgr);
 	cout << "Printing system has worked on [" << sys::print.image() << "] entities" << endl;
-	cout << "Trivially constructible:";
+	// cout << "Trivially constructible:";
 	return 0;
 }

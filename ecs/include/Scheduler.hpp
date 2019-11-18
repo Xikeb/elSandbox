@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdlib>
 #include <thread>
 #include <atomic>
 #include <mutex>
@@ -6,92 +7,146 @@
 #include <functional>
 #include <deque>
 #include <condition_variable>
+#include <iostream>
+#include <utility>
+
+#include "Job.hpp"
+#include "Worker.hpp"
 
 namespace ecs {
-	class Scheduler {
-	private:
-		using Task = std::function<void(void)>;
+    template<typename WorkerType>
+    class PrimitiveScheduler {
+    public:
+        using Worker = WorkerType;
+        using Task = WorkerType::Work;
 
-		class TaskQueue {
-		public:
-			void push(Task const &t)
-			{
-				std::lock_guard l{this->m};
-				this->queue.push_back(t);
-				this->count.fetch_add(1);
-			}
+        explicit PrimitiveScheduler(std::size_t workerCount = std::thread::hardware_concurrency() - 1):
+            _workerCount{workerCount}, _workers{workerCount}
+            {
+                this->_threadPool.reserve(workerCount);
 
-			void push(Task &&t)
-			{
-				std::lock_guard l{this->m};
+                for (auto i = workerCount; i; --i)
+                    this->_threadPool.emplace_back([this, idx = i-1]{ this->run(idx); });
+            }
 
-				this->queue.push_back(std::move(t));
-				this->count.fetch_add(1);
-			}
+        ~PrimitiveScheduler() {
+            if (!this->_done) this->stop();
 
-			bool pop(Task &t)
-			{
-				std::lock_guard l{this->m};
+            std::for_each(
+                this->_threadPool.begin(), this->_threadPool.end(),
+                [](auto &&thr) { if (thr.joinable()) thr.join(); }
+                );
+        }
 
-				if (!this->count)
-					return false;
+        void schedule(Task &&j) { //Add job to job list(s)
+            if (this->_done) return;
 
-				this->count.fetch_sub(1);
-				t = std::move(this->queue.front());
-				this->queue.pop_front();
-				return true;
-			}
+            auto count = this->_workerCount;
+            auto idx = this->_index++;
 
-			std::atomic<size_t> count{0};
-			std::deque<Task> queue{256};
-			std::mutex m{};
-		};
+            for (std::size_t i = 0; i < count; ++i) {
+                auto &worker = this->_workers[(idx + i) % count];
+                if (worker.tryPush(std::move(j))) return;
+            }
 
-		class Worker {
-		public:
-			Worker(std::size_t id):
-				id{id},
-				thr{[this]{ this->run(); }}
-			{
-			}
+            this->_workers[idx % count].push(std::move(j));
+        }
 
-			void run()
-			{
+        template<typename Iter>
+        void schedule(Iter first, Iter last) {
+            if (this->_done) return;
 
-			}
+            auto dist = std::distance(first, last);
 
-			size_t id;
-			std::thread thr;
-		};
-	public:
-		explicit Scheduler(size_t poolSize = 4):
-			tasks{poolSize},
-			threadPool{poolSize},
-			running{true}
-		{
-		}
+            if (!dist) return;
 
-		void schedule(Task const &t) { this->tasks.push(t); this->taskAvailable.notify_one(); }
-		void schedule(Task &&t) { this->tasks.push(t); this->taskAvailable.notify_one(); }
+            auto count = this->_workerCount;
+            auto stride = (dist / count) ?: 1;
+            auto next = first + stride;
+            auto idx = this->_index++;
 
-		void work(size_t /*myId*/ = 0)
-		{
-			Task t;
+            for (std::size_t i = count; i; --i) {
+                auto &worker = this->_workers[(idx + i) % count];
+                if (worker.tryPush(first, next)) {
+                    first = next;
+                    next = (i <= 1) ? last : (next + stride);
+                }
+            }
 
-			while (this->running) {
-				while (!this->tasks.pop(t)) {
-					std::unique_lock lk{this->m};
-					this->taskAvailable.wait(lk, [this]{ return this->tasks.count == 0u; });
-				}
-				t();
-			}
-		}
+            if (first >= last) {
+                this->_workers[idx % count].push(first, last);
+            }
+        }
 
-		std::mutex m;
-		std::condition_variable taskAvailable;
-		std::unique_lock<std::mutex> ul{m, std::defer_lock};
-		TaskQueue tasks;
-		std::vector<std::thread> threadPool;
-		bool running:1;
-	};
+        template<typename ...Args>
+        void schedule_inplace(Args&&... args) { //Add job to job list(s)
+            if (this->_done) return;
+
+            auto count = this->_workerCount;
+            auto idx = this->_index++;
+
+            for (std::size_t i = 0; i < count; ++i) {
+                auto &worker = this->_workers[(idx + i) % count];
+                if (worker.tryEmplace(std::forward<Args>(args)...)) return;
+            }
+
+            this->_workers[idx % count].emplace(std::forward<Args>(args)...);
+        }
+
+        void stop() {
+            this->_done = true;
+            std::for_each(
+                std::begin(this->_workers),
+                std::end(this->_workers),
+                [](auto &w) { w.stop(); }
+                );
+        }
+
+        Worker &anyWorker() {
+            size_t idx = this->_index;
+            size_t count = this->_workerCount;
+            size_t offset;
+
+            do {
+                offset = (idx + std::rand()) % count;
+            } while (offset == idx);
+
+            return this->_workers[offset];
+        }
+
+    private:
+        std::atomic<std::size_t> _index = 0;
+        size_t _workerCount;
+        std::vector<Worker> _workers;
+        std::vector<std::thread> _threadPool;
+        bool _done = false;
+
+        void run(std::size_t idx) {
+            Job j(nullptr);
+
+            while (!this->_done) {
+                if (this->getWork(j, idx))
+                    j();
+            }
+        }
+
+        bool getWork(Task &j, std::size_t idx) {
+            if (this->_done) return false;
+
+            if (this->_workers[idx].tryPop(j)) {
+                return true;
+            }
+            
+            auto count = this->_workerCount;
+            for (std::size_t i = count; i > 1; --i) {
+                auto &worker = this->_workers[(idx + i) % count];
+                if (worker.trySteal(j)) {
+                    //if (i) std::cout << "steal" << std::endl;
+                    return true;
+                }
+            }
+
+            return this->_workers[idx % count].pop(j);
+        }
+    };
 } // ecs
