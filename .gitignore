@@ -37,3 +37,5 @@ ecs/ecs
 \#*\#
 *~
 vgcore*
+.idea/
+cmake-build-debug/
