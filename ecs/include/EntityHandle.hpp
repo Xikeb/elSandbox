@@ -41,7 +41,7 @@ namespace ecs {
 			Manager &mgr,
 			ecs::HandleDataIdx dataIdx,
 			int phase
-		): _mgr(mgr), _dataIdx(dataIdx), _phase(phase)
+			): _mgr(mgr), _dataIdx(dataIdx), _phase(phase)
 		{
 		}
 
@@ -52,8 +52,7 @@ namespace ecs {
 			// std::cerr << "Entity Handle was copied" << std::endl;
 		}
 
-		Self &operator=(Self const &oth) noexcept
-		{
+		Self &operator=(Self const &oth) noexcept {
 			//Placement-new is required because of reference to manager
 			return *(new (this) Self(oth));
 		}
@@ -61,18 +60,15 @@ namespace ecs {
 		int getPhase() const noexcept { return this->_phase; }
 		auto &getManager() noexcept { return this->_mgr; }
 
-		bool isInPhase() const noexcept
-		{
+		bool isInPhase() const noexcept {
 			return (this->_mgr.getHandleData(this->_dataIdx).phase == this->_phase);
 		}
 
-		bool isValid() const noexcept
-		{
+		bool isValid() const noexcept {
 			return this->isInPhase() && this->_mgr.getEntity(this->_dataIdx);
 		}
 
-		void kill() noexcept
-		{
+		void kill() noexcept {
 			// auto &mgr = this->_mgr;
 			// auto dataIdx = this->_dataIdx;
 
@@ -82,8 +78,7 @@ namespace ecs {
 		}
 
 		template<typename TSignature>
-		bool matchesSignature(TSignature &&sig) const noexcept
-		{
+		bool matchesSignature(TSignature &&sig) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -92,8 +87,7 @@ namespace ecs {
 		}
 
 		template<typename TSignature>
-		bool matchesSignature() const noexcept
-		{
+		bool matchesSignature() const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -101,9 +95,11 @@ namespace ecs {
 			return mgr.getEntity(dataIdx).template matchesSignature<TSignature>();
 		}
 
+		/*
+		 * Check for presence of component
+		*/
 		template<typename T>
-		bool hasComponent() const noexcept
-		{
+		bool hasComponent() const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -112,8 +108,28 @@ namespace ecs {
 		}
 
 		template<typename T>
-		auto &getComponent() const noexcept
-		{
+		bool hasComponent(el::Type_c<T> const &) const noexcept {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			return mgr.template hasComponent<T>(dataIdx);
+		}
+
+		/*
+		 * Check for presence of component
+		*/
+		template<typename T>
+		auto &getComponent() const noexcept {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			return mgr.template getComponent<T>(dataIdx);
+		}
+
+		template<typename T>
+		auto &getComponent(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -122,8 +138,17 @@ namespace ecs {
 		}
 
 		template<typename T, typename ...Args>
-		auto &addComponent(Args&&... args) const noexcept
-		{
+		auto &addComponent(Args&&... args) const noexcept {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			mgr.template addComponent<T>(dataIdx, std::forward<Args>(args)...);
+			return *this;
+		}
+
+		template<typename T, typename ...Args>
+		auto &addComponent(el::Type_c<T> const &, Args&&... args) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -133,8 +158,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		auto &removeComponent() const noexcept
-		{
+		auto &removeComponent() const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -144,41 +168,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		bool hasTag() const noexcept
-		{
-			auto &mgr = this->_mgr;
-			auto dataIdx = this->_dataIdx;
-
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			return mgr.template hasTag<T>(dataIdx);
-		}
-
-		template<typename T>
-		auto &addTag() const noexcept
-		{
-			auto &mgr = this->_mgr;
-			auto dataIdx = this->_dataIdx;
-
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			mgr.template addTag<T>(dataIdx);
-			return *this;
-		}
-
-		template<typename T>
-		auto &removeTag() const noexcept
-		{
-			auto &mgr = this->_mgr;
-			auto dataIdx = this->_dataIdx;
-
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			mgr.template removeTag<T>(dataIdx);
-			return *this;
-		}
-
-		//Overloads meant for type_c tags
-		template<typename T>
-		auto &removeComponent(el::Type_c<T> const &) const noexcept
-		{
+		auto &removeComponent(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -187,51 +177,26 @@ namespace ecs {
 			return *this;
 		}
 
-		template<typename T, typename ...Args>
-		auto &addComponent(el::Type_c<T> const &, Args&&... args) const noexcept
-		{
+		template<typename T>
+		bool hasTag() const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
 			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			mgr.template addComponent<T>(dataIdx, std::forward<Args>(args)...);
-			return *this;
+			return mgr.template hasTag<T>(dataIdx);
 		}
 
 		template<typename T>
-		auto &getComponent(el::Type_c<T> const &) const noexcept
-		{
+		bool hasTag(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
 			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			return mgr.template getComponent<T>(dataIdx);
+			return mgr.template hasTag<T>(dataIdx);
 		}
 
 		template<typename T>
-		bool hasComponent(el::Type_c<T> const &) const noexcept
-		{
-			auto &mgr = this->_mgr;
-			auto dataIdx = this->_dataIdx;
-
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			return mgr.template hasComponent<T>(dataIdx);
-		}
-
-		template<typename T>
-		auto &removeTag(el::Type_c<T> const &) const noexcept
-		{
-			auto &mgr = this->_mgr;
-			auto dataIdx = this->_dataIdx;
-
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			mgr.template removeTag<T>(dataIdx);
-			return *this;
-		}
-
-		template<typename T>
-		auto &addTag(el::Type_c<T> const &) const noexcept
-		{
+		auto &addTag() const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -241,50 +206,60 @@ namespace ecs {
 		}
 
 		template<typename T>
-		bool hasTag(el::Type_c<T> const &) const noexcept
-		{
+		auto &addTag(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
 			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
-			return mgr.template hasTag<T>(dataIdx);
+			mgr.template addTag<T>(dataIdx);
+			return *this;
 		}
 
-		bool operator==(Self const &oth) const noexcept
-		{
+		template<typename T>
+		auto &removeTag() const noexcept {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			mgr.template removeTag<T>(dataIdx);
+			return *this;
+		}
+
+		template<typename T>
+		auto &removeTag(el::Type_c<T> const &) const noexcept {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			mgr.template removeTag<T>(dataIdx);
+			return *this;
+		}
+
+		bool operator==(Self const &oth) const noexcept {
 			return (&this->_mgr == &oth._mgr)
-			&& (this->_dataIdx == oth._dataIdx) && (this->_phase == oth._phase);
+				&& (this->_dataIdx == oth._dataIdx)
+				&& (this->_phase == oth._phase);
 		}
 
 		template<typename T>
-		el::enable_if_t<
-			isComponent<T>,
-			T &
-		> operator[](el::Type_c<T> const &) const noexcept
-		{
+		el::enable_if_t<isComponent<T>, T&> operator[](el::Type_c<T> const &) const noexcept {
 			return this->template getComponent<T>();
 		}
 
 		template<typename T>
-		el::enable_if_t<
-			isTag<T>,
-			bool
-		> operator[](el::Type_c<T> const &) const noexcept
-		{
+		el::enable_if_t<isTag<T>, bool> operator[](el::Type_c<T> const &) const noexcept {
 			return this->template hasTag<T>();
 		}
 
-		template<typename T>
-		el::enable_if_t<el::is_type_list<T>::value, bool> operator&(el::Type_c<T> const &) const noexcept
-		{
-			return Settings::ComponentList::every([this](auto &&comp, auto&&) noexcept {
-				return this->template hasComponent<TYPE_OF(comp)>();
+		template<typename Types>
+		el::enable_if_t<el::is_type_list<Types>::value, bool> operator&(el::Type_c<Types> const &) const noexcept {
+			return Types::every([this](auto &&elem, auto&&) noexcept {
+				return *this & elem;
 			});
 		}
 
 		template<typename T>
-		el::enable_if_t<isComponent<T>, bool> operator&(el::Type_c<T> const &) const noexcept
-		{
+		el::enable_if_t<isComponent<T>, bool> operator&(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -293,14 +268,26 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isTag<T>, bool> operator&(el::Type_c<T> const &) const noexcept
-		{
+		el::enable_if_t<isTag<T>, bool> operator&(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
 			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
 			return mgr.template hasTag<T>(dataIdx);
 		}
+
+        template<typename T>
+		el::enable_if<isComponent<T>, Self&> operator<<(el::Type_c<T> const &) {
+			this->template addComponent<T>();
+			return *this;
+		}
+
+        template<typename T>
+		el::enable_if<isComponent<T>, Self &> operator<<(T &&t) {
+			this->template addComponent<T>(std::forward<T>(t));
+			return *this;
+		}
+
 	private:
 		Manager &_mgr;
 		ecs::HandleDataIdx _dataIdx;
