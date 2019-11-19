@@ -63,35 +63,22 @@
 			template<typename ...Ts>
 			using Push = el::type_list<Ts...>;
 
-			template<typename TF, typename ...Args>
-			static auto for_each(TF&& f, Args&&...)
-			{
-				return std::move(f);
-			}
-
 			template<typename ...Ts>
-			constexpr auto push() const noexcept
-			{
-				return Self::template Push<Ts...>{};
-			}
+			constexpr static auto push() noexcept { return el::type_list<Ts...>{}; }
+			template<typename ...Ts>
+			constexpr static auto unshift() noexcept { return el::type_list<Ts...>{}; }
 
 			template<typename TF, typename ...Args>
-			constexpr static auto every(TF&&, Args&&...)
-			{
-				return el::false_c{};
-			}
+			constexpr static auto for_each(TF&& f, Args&&...) noexcept { return std::move(f); }
 
 			template<typename TF, typename ...Args>
-			constexpr static auto some(TF&&, Args&&...)
-			{
-				return el::true_c{};
-			}
+			constexpr static auto every(TF&&, Args&&...) noexcept { return el::false_c{}; }
+
+			template<typename TF, typename ...Args>
+			constexpr static auto some(TF&&, Args&&...) noexcept { return el::true_c{}; }
 
 			template<typename TF, typename Acc, typename ...Args>
-			constexpr static auto reduce(TF&&, Acc&& acc, Args&&...)
-			{
-				return std::forward<Acc>(acc);
-			}
+			constexpr static auto reduce(TF&&, Acc&& acc, Args&&...) { return std::forward<Acc>(acc); }
 		};
 
 		template<typename THead, typename ...TRest>
@@ -112,13 +99,11 @@
 			struct Has {
 				constexpr Has() = default;
 				template<typename T>
-				constexpr auto operator()() const noexcept
-				{
+				constexpr auto operator()() const noexcept {
 					return TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0))();
 				}
 				template<typename T>
-				constexpr auto operator()(el::Type_c<T>) const noexcept
-				{
+				constexpr auto operator()(el::Type_c<T>) const noexcept {
 					return TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0))();
 				}
 			};
@@ -162,23 +147,8 @@
 				Cond{}
 			));
 
-			/*template<typename TF, typename Accu, typename ...Args>
-			auto reduce(TF&& callable, Accu&& accu = Accu(), Args&&... args)
-			{
-				return Next().reduce(
-					callable,
-					callable(
-						accu,
-						el::type_c<Current>(),
-						std::forward<Args>(args)...
-					),
-					std::forward<Args>(args)...
-				);
-			}*/
-
 			template<typename TF, typename ...Args>
-			constexpr static auto for_each(TF&& f, Args&&... args)
-			{
+			constexpr static auto for_each(TF&& f, Args&&... args) noexcept {
 				return el::impl::for_each<Self>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
@@ -187,8 +157,7 @@
 			}
 
 			template<typename TF, typename ...Args>
-			constexpr static auto every(TF&& f, Args&&... args)
-			{
+			constexpr static auto every(TF&& f, Args&&... args) noexcept {
 				return el::impl::every<Self>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
@@ -197,8 +166,7 @@
 			}
 
 			template<typename TF, typename ...Args>
-			constexpr static auto some(TF&& f, Args&&... args)
-			{
+			constexpr static auto some(TF&& f, Args&&... args) noexcept {
 				return el::impl::some<Self>(
 					el::size_c<0>(),
 					std::forward<TF>(f),
@@ -208,8 +176,7 @@
 			}
 
 			template<typename TF, typename Acc, typename ...Args>
-			constexpr static auto reduce(TF&& f, Acc&& acc, Args&&... args)
-			{
+			constexpr static auto reduce(TF&& f, Acc&& acc, Args&&... args) noexcept {
 				return el::impl::reduce<Self>(
 					el::size_c<size - 1>(),
 					std::forward<TF>(f),
