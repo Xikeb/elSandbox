@@ -29,12 +29,21 @@ namespace ecs {
 		} // impl
 
 		template<typename ...Ts>
-		struct Dependencies {
+		struct dependencies {
 			using Types = decltype(reducedDependencies<Ts...>);
 
-			constexpr Dependencies() noexcept = default;
-			constexpr Dependencies(el::Type_c<el::type_list<Ts...>>) noexcept {}
-			constexpr Dependencies(Ts&&...) noexcept {}
-		}; //struct Dependencies
+			constexpr dependencies() noexcept = default;
+			constexpr dependencies(el::Type_c<el::type_list<Ts...>>) noexcept {}
+			constexpr dependencies(Ts&&...) noexcept {}
+
+			template<typename T>
+			constexpr auto operator+(el::Type_c<T>) const noexcept {
+				return el::conditional_t<
+					Types::template Contains<T>::value,
+					dependencies<Ts...>,
+					dependencies<Ts..., T>
+				>{};
+			}
+		}; //struct dependencies
 	} // config
 } //ecs

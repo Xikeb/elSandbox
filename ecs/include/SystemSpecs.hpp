@@ -63,17 +63,16 @@ namespace ecs {
 
 		Callback callback;
 
-		constexpr explicit SystemSpecs(Callback const &f): callback(f)
+		constexpr explicit SystemSpecs(Callback const &f) noexcept: callback(f)
 		{
 		}
 
-		constexpr explicit SystemSpecs(el::remove_ref_t<Callback> &&f): callback(std::move(f))
+		constexpr explicit SystemSpecs(el::remove_ref_t<Callback> &&f) noexcept: callback(std::move(f))
 		{
 		}
 
 		template<typename Image>
-		constexpr auto instantiateWith(el::Type_c<Image>) const noexcept
-		{
+		constexpr auto instantiateWith(el::Type_c<Image>) const noexcept {
 			return ecs::SystemSpecs<
 				Callback,
 				Dependencies,
@@ -83,8 +82,7 @@ namespace ecs {
 		}
 
 		template<typename Image>
-		constexpr auto instantiateWith() const noexcept
-		{
+		constexpr auto instantiateWith() const noexcept {
 			return ecs::SystemSpecs<
 				Callback,
 				Dependencies,
@@ -94,14 +92,12 @@ namespace ecs {
 		}
 
 		template<typename F>
-		constexpr auto execution(F&& f) const noexcept
-		{
+		constexpr auto execution(F&& f) const noexcept {
 			return ecs::SystemSpecs<F, Dependencies, Instance, Signature>(std::forward<F>(f));
 		}
 
 		template<typename ...Requirements>
-		constexpr auto after(el::Type_c<el::type_list<Requirements...>>) const noexcept
-		{
+		constexpr auto after(el::Type_c<el::type_list<Requirements...>>) const noexcept {
 			return ecs::SystemSpecs<
 				Callback,
 				typename Dependencies::template Push<Requirements...>,
@@ -111,31 +107,26 @@ namespace ecs {
 		}
 
 		template<typename TSig>
-		constexpr auto matching(el::Type_c<TSig>) const noexcept
-		{
+		constexpr auto matching(el::Type_c<TSig>) const noexcept {
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, TSig>(this->callback);
 		}
 
 		template<typename TSig>
-		constexpr auto matching() const noexcept //Write entire system eecution yourself
-		{
+		constexpr auto matching() const noexcept { //Write entire system execution yourself
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, TSig>(this->callback);
 		}
 
-		constexpr auto manual() const noexcept
-		{
+		constexpr auto manual() const noexcept {
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, void>(this->callback);
 		}
 
 		template<typename ...Args>
-		constexpr auto system(Args&&... args) const noexcept
-		{
+		constexpr auto system(Args&&... args) const noexcept {
 			return System(this->callback, std::forward<Args>(args)...);
 		}
 
 		template<typename ...Args>
-		constexpr auto operator()(Args&&... args) const noexcept
-		{
+		constexpr auto operator()(Args&&... args) const noexcept {
 			return this->system(std::forward<Args>(args)...);
 		}
 	};

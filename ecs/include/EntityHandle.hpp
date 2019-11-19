@@ -32,6 +32,11 @@ namespace ecs {
 		template<typename T>
 		constexpr static std::size_t tagId = Manager::template tagId<T>;
 
+		template<typename T, typename U>
+		using ifIsComponent = el::enable_if_t<isComponent<T>, U>;
+		template<typename T, typename U>
+		using ifIsTag = el::enable_if_t<isTag<T>, U>;
+
 		explicit EntityHandle(Manager &mgr) noexcept:
 		_mgr(mgr), _dataIdx(-1), _phase(-1)
 		{
@@ -41,7 +46,7 @@ namespace ecs {
 			Manager &mgr,
 			ecs::HandleDataIdx dataIdx,
 			int phase
-			): _mgr(mgr), _dataIdx(dataIdx), _phase(phase)
+		): _mgr(mgr), _dataIdx(dataIdx), _phase(phase)
 		{
 		}
 
@@ -52,6 +57,7 @@ namespace ecs {
 			// std::cerr << "Entity Handle was copied" << std::endl;
 		}
 
+		//Copy-assignment
 		Self &operator=(Self const &oth) noexcept {
 			//Placement-new is required because of reference to manager
 			return *(new (this) Self(oth));
@@ -60,10 +66,12 @@ namespace ecs {
 		int getPhase() const noexcept { return this->_phase; }
 		auto &getManager() noexcept { return this->_mgr; }
 
+		//Whether this handle has the same phase as the entity it represents (handle is invalid otherwise)
 		bool isInPhase() const noexcept {
 			return (this->_mgr.getHandleData(this->_dataIdx).phase == this->_phase);
 		}
 
+		// What purpose does it have??
 		bool isValid() const noexcept {
 			return this->isInPhase() && this->_mgr.getEntity(this->_dataIdx);
 		}
@@ -72,7 +80,6 @@ namespace ecs {
 			// auto &mgr = this->_mgr;
 			// auto dataIdx = this->_dataIdx;
 
-			// assert(mgr.getHandleData(dataIdx).phase == this->_phase);
 			assert(this->isInPhase());
 			this->_mgr.killEntity(this->_dataIdx);
 		}
@@ -82,7 +89,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.getEntity(dataIdx).matchesSignature(std::forward<TSignature>(sig));
 		}
 
@@ -91,7 +98,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.getEntity(dataIdx).template matchesSignature<TSignature>();
 		}
 
@@ -103,7 +110,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template hasComponent<T>(dataIdx);
 		}
 
@@ -112,7 +119,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template hasComponent<T>(dataIdx);
 		}
 
@@ -124,7 +131,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template getComponent<T>(dataIdx);
 		}
 
@@ -133,7 +140,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template getComponent<T>(dataIdx);
 		}
 
@@ -142,7 +149,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template addComponent<T>(dataIdx, std::forward<Args>(args)...);
 			return *this;
 		}
@@ -152,7 +159,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template addComponent<T>(dataIdx, std::forward<Args>(args)...);
 			return *this;
 		}
@@ -162,7 +169,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template removeComponent<T>(dataIdx);
 			return *this;
 		}
@@ -172,7 +179,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template removeComponent<T>(dataIdx);
 			return *this;
 		}
@@ -182,7 +189,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template hasTag<T>(dataIdx);
 		}
 
@@ -191,7 +198,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template hasTag<T>(dataIdx);
 		}
 
@@ -200,7 +207,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template addTag<T>(dataIdx);
 			return *this;
 		}
@@ -210,7 +217,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template addTag<T>(dataIdx);
 			return *this;
 		}
@@ -220,7 +227,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template removeTag<T>(dataIdx);
 			return *this;
 		}
@@ -230,7 +237,7 @@ namespace ecs {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			mgr.template removeTag<T>(dataIdx);
 			return *this;
 		}
@@ -242,12 +249,12 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isComponent<T>, T&> operator[](el::Type_c<T> const &) const noexcept {
+		ifIsComponent<T, T&> operator[](el::Type_c<T> const &) const noexcept {
 			return this->template getComponent<T>();
 		}
 
 		template<typename T>
-		el::enable_if_t<isTag<T>, bool> operator[](el::Type_c<T> const &) const noexcept {
+		ifIsTag<T, bool> operator[](el::Type_c<T> const &) const noexcept {
 			return this->template hasTag<T>();
 		}
 
@@ -259,34 +266,75 @@ namespace ecs {
 		}
 
 		template<typename T>
-		el::enable_if_t<isComponent<T>, bool> operator&(el::Type_c<T> const &) const noexcept {
+		ifIsComponent<T, bool> operator&(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template hasComponent<T>(dataIdx);
 		}
 
 		template<typename T>
-		el::enable_if_t<isTag<T>, bool> operator&(el::Type_c<T> const &) const noexcept {
+		ifIsTag<T, bool> operator&(el::Type_c<T> const &) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
-			assert(mgr.getHandleData(dataIdx).phase == this->_phase);
+			assert(this->isInPhase());
 			return mgr.template hasTag<T>(dataIdx);
 		}
 
         template<typename T>
-		el::enable_if<isComponent<T>, Self&> operator<<(el::Type_c<T> const &) {
-			this->template addComponent<T>();
+		ifIsComponent<T, Self&> operator<<(el::Type_c<T> const &) {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(this->isInPhase());
+			mgr.template addComponent<T>(dataIdx);
 			return *this;
 		}
 
         template<typename T>
-		el::enable_if<isComponent<T>, Self &> operator<<(T &&t) {
-			this->template addComponent<T>(std::forward<T>(t));
+		ifIsTag<T, Self&> operator<<(el::Type_c<T> const &) {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(this->isInPhase());
+			mgr.template addTag<T>(dataIdx);
 			return *this;
 		}
+
+        template<typename T>
+		ifIsComponent<T, Self&> operator<<(T &&t) {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(this->isInPhase());
+			mgr.template addComponent<T>(dataIdx, std::forward<T>(t));
+			return *this;
+		}
+
+        template<typename T>
+		ifIsComponent<T, Self&> operator>>(el::Type_c<T> const &) {
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(this->isInPhase());
+			mgr.template removeComponent<T>(dataIdx);
+			return *this;
+		}
+
+        template<typename T>
+		ifIsComponent<T, Self&> operator>>(T &t) {
+
+			auto &mgr = this->_mgr;
+			auto dataIdx = this->_dataIdx;
+
+			assert(this->isInPhase());
+			t = mgr.template getComponent<T>(dataIdx);
+			return *this;
+		}
+
+		//Add a toggle component/tag operator
 
 	private:
 		Manager &_mgr;

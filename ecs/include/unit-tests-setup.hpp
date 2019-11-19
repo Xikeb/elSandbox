@@ -80,6 +80,8 @@ namespace test {
 		Color col;
 		float depth;
 	};
+	struct Position: Vector2f {};
+	struct Speed: Vector2f {};
 
 	struct Inverted;
 	struct KillOnSight;
@@ -94,6 +96,8 @@ ECS_NSCOMPONENT(test, Transform);
 ECS_NSCOMPONENT(test, Color);
 ECS_NSCOMPONENT(test, Drawable);
 ECS_NSCOMPONENT(std, string);
+ECS_NSCOMPONENT(test, Position);
+ECS_NSCOMPONENT(test, Speed);
 
 namespace test {
 	using Components = ecs::ComponentList<
@@ -114,6 +118,10 @@ namespace test {
 	>;
 
 	using HasString = ecs::Signature<Settings, std::string>;
+
+	namespace sign {
+		using Movable = ecs::Signature<Settings, Position, Speed>;
+	} // sign
 } // test
 
 namespace text {

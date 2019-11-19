@@ -22,6 +22,8 @@ namespace ecs {
 			using type = Spec;
 			using System = decltype(std::declval<type>().system());
 			using Dependencies = typename Spec::Dependencies;
+			template<typename T>
+			using SystemOf = decltype(std::declval<T>().system());
 			using SystemStorage = std::aligned_storage_t<
 				sizeof(SystemOf<Spec>),
 				alignof(SystemOf<Spec>)
@@ -53,12 +55,21 @@ namespace ecs {
 
 		template<typename T>
 		using SystemOf = decltype(std::declval<T>().system());
+		template<size_t Id>
+		using SpecById = typename Specifications::template At<Id>;
+		template<std::size_t Id>
+		using SystemById = SystemOf<SpecById<Id>>;
 
 		template<typename Spec>
 		using SystemStorage = std::aligned_storage_t<
 			sizeof(SystemOf<Spec>),
 			alignof(SystemOf<Spec>)
 		>;
+
+		template<typename Spec>
+		constexpr static size_t specId = Specifications::template IndexOf<Spec>::value;
+		template<typename Spec>
+		constexpr static bool isOwnSpec = Specifications::template Contains<Spec>::value;
 
 		struct is_not_void {
 			template<typename T>
@@ -75,14 +86,6 @@ namespace ecs {
 		};
 
 		using AutomaticSystems = typename Specifications::template Filter<is_not_void>;
-
-		template<typename Spec>
-		constexpr static size_t specId = Specifications::template IndexOf<Spec>::value;
-		template<typename Spec>
-		constexpr static bool isOwnSpec = Specifications::template Contains<Spec>::value;
-
-		template<size_t Id>
-		using SpecById = typename Specifications::template At<Id>;
 
 		static_assert(
 			ecs::detail::is_settings<Settings>,
@@ -109,45 +112,39 @@ namespace ecs {
 		}
 
 		template<typename Spec>
-		auto &getSystem(Spec) noexcept
-		{
+		auto &getSystem(Spec) noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}
 
 		template<typename Spec>
-		auto const &getSystem(Spec) const noexcept
-		{
+		auto const &getSystem(Spec) const noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}
 
 		template<typename Spec>
-		auto &getSystem() noexcept
-		{
+		auto &getSystem() noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}
 
 		template<typename Spec>
-		auto const &getSystem() const noexcept
-		{
+		auto const &getSystem() const noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}
 
 		template<size_t Id>
-		auto &getSystem() noexcept
-		{
+		auto &getSystem() noexcept {
 			static_assert(Id < Specifications::size, ECS_SPEC_OUT_OF_BOUNDS);
-			return this->system<Spec>();
+			return this->system<Id>();
 		}
 
 		template<size_t Id>
-		auto const &getSystem() const noexcept
-		{
+		auto const &getSystem() const noexcept {
 			static_assert(Id < Specifications::size, ECS_SPEC_OUT_OF_BOUNDS);
-			return this->system<Spec>();
+			return this->system<Id>();
 		}
 
 		template<typename Spec, typename ...Args>
@@ -167,9 +164,13 @@ namespace ecs {
 
 	private:
 		template<typename T>
-		constexpr auto &system() const noexcept { return reinterpret_cast<SystemOf<T> &>(std::get<specId<T>>(this->systems));}
+		constexpr auto &system() noexcept { return reinterpret_cast<SystemOf<T> &>(std::get<specId<T>>(this->systems));}
 		template<typename T>
 		constexpr auto const &system() const noexcept { return reinterpret_cast<SystemOf<T> const &>(std::get<specId<T>>(this->systems));}
+		template<size_t Id>
+		constexpr auto &system() noexcept { return reinterpret_cast<SystemById<Id> &>(std::get<Id>(this->systems));}
+		template<size_t Id>
+		constexpr auto const &system() const noexcept { return reinterpret_cast<SystemById<Id> const &>(std::get<Id>(this->systems));}
 	};
 
 	template<typename TSettings, typename ...Specs>
