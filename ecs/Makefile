@@ -34,7 +34,7 @@ TESTSRCS	=	$(TESTSRCSDIR)/Entity_test.cpp			\
 
 TESTOBJS	=	$(TESTSRCS:.cpp=.o)
 
-CPPFLAGS	=	-I ./include/ -I../ #-DNDEBUG
+CPPFLAGS	=	-I ./include/ -I../ -DNDEBUG
 CPPFLAGS	+=	-W -Wall -Wextra -Werror
 
 LDFLAGS		=

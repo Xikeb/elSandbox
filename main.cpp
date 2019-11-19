@@ -1,7 +1,6 @@
 #include <iostream>
 #include <tuple>
 #include "el/type_list/type_list.hpp"
-#include "el/type_list/includes.hpp"
 #include "el/detail/and.hpp"
 #include "el/types/is_valid.hpp"
 #include "el/types/type_c.hpp"
@@ -46,9 +45,6 @@ int utests_elMeta()
 
 	cout << "<And> test:\t\t";
 	pretty_print(el::detail::_and<true, true, false>{ });
-
-	cout << "<Includes> test:\t";
-	pretty_print(el::Includes<Likes, int>{ });
 
 	cout << "<Contains(true)> test:\t";
 	pretty_print(Likes::Contains<int>{ });
