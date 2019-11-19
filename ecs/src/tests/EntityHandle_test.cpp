@@ -79,7 +79,7 @@ TEST(EntityHandleTest, matchesSignature) {
 	EXPECT_TRUE(ent & comp::string);
 	EXPECT_EQ(ent[comp::string], str);
 
-	size_t count = 10000000;
+	size_t count = 100000000;
 	benchmark([]{
 		EXPECT_TRUE(true);
 	}, count, "assert(true)");

@@ -84,7 +84,7 @@ TEST(ManagerTest, componentTagCount) {
 TEST(ManagerTest, createEntity) {
 	FullManager fmgr;
 	EmptyManager emgr;
-	std::size_t count = 100000;
+	std::size_t count = 1000000;
 	constexpr static auto createEntity = [](auto&& mgr) {mgr.createEntity();};
 
 	fmgr.createEntity();
@@ -139,7 +139,7 @@ TEST(ManagerTest, refresh) {
 	EmptyManager emgr;
 	std::vector<decltype(fmgr.createEntity())> fents;
 	std::vector<decltype(emgr.createEntity())> eents;
-	std::size_t count = 100000;
+	std::size_t count = 1000000;
 
 	count = 30;
 	for (auto i = 0u; i < count; ++i) {

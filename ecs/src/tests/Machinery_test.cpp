@@ -24,7 +24,7 @@ TEST(MachineryTest, Instantiation) {
 	fmch.construct(spec);
 	emch.construct(spec);
 	EXPECT_TRUE((fmch.isOwnSpec<decltype(spec)>));
-	EXPECT_EQ((fmch.systemId<decltype(spec)>), 0);
+	EXPECT_EQ((fmch.specId<decltype(spec)>), 0);
 	EXPECT_TRUE((el::is_same_v<
 		el::remove_ref_t<decltype(fmch)::SpecById<0>>,
 		el::remove_ref_t<decltype(spec)>
