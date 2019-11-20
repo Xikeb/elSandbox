@@ -30,6 +30,7 @@
 		template <typename ...Types>
 		struct type_list;
 
+		//name this to 'type_list_t' and make a default constexpr static instance of the class 
 		template<>
 		struct type_list<> {
 			using Self = el::type_list<>;
@@ -66,7 +67,16 @@
 			template<typename ...Ts>
 			constexpr static auto push() noexcept { return el::type_list<Ts...>{}; }
 			template<typename ...Ts>
+			constexpr static auto push(el::Type_c<Ts>...) noexcept { return el::type_list<Ts...>{}; }
+			template<typename ...Ts>
 			constexpr static auto unshift() noexcept { return el::type_list<Ts...>{}; }
+			template<typename ...Ts>
+			constexpr static auto unshift(el::Type_c<Ts>...) noexcept { return el::type_list<Ts...>{}; }
+
+			template<std::size_t N = 1>
+			constexpr static auto pop(el::size_c<N> = {}) noexcept { return el::type_list<>{}; }
+			template<std::size_t N = 1>
+			constexpr static auto shift(el::size_c<N> = {}) noexcept { return el::type_list<>{}; }
 
 			template<typename TF, typename ...Args>
 			constexpr static auto for_each(TF&& f, Args&&...) noexcept { return std::move(f); }
@@ -125,6 +135,20 @@
 			using Unshift = el::type_list<T..., THead, TRest...>;
 			template<typename ...T>
 			using Push = el::type_list<THead, TRest..., T...>;
+
+			template<typename ...Ts>
+			constexpr static auto push() noexcept { return el::type_list<THead, TRest..., Ts...>{}; }
+			template<typename ...Ts>
+			constexpr static auto push(el::Type_c<Ts>...) noexcept { return el::type_list<THead, TRest..., Ts...>{}; }
+			template<typename ...Ts>
+			constexpr static auto unshift() noexcept { return el::type_list<Ts..., THead, TRest...>{}; }
+			template<typename ...Ts>
+			constexpr static auto unshift(el::Type_c<Ts>...) noexcept { return el::type_list<Ts..., THead, TRest...>{}; }
+
+			template<std::size_t N = 1>
+			constexpr static auto pop(el::size_c<N> = {}) noexcept { return el::type_list<>{}; }
+			template<std::size_t N = 1>
+			constexpr static auto shift(el::size_c<N> = {}) noexcept { return el::type_list<>{}; }
 
 			template<typename Cond>
 			constexpr static auto filter(Cond&& c) {
