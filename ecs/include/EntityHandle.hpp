@@ -115,7 +115,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		bool hasComponent(el::Type_c<T> const &) const noexcept {
+		bool hasComponent(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -136,7 +136,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		auto &getComponent(el::Type_c<T> const &) const noexcept {
+		auto &getComponent(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -155,7 +155,7 @@ namespace ecs {
 		}
 
 		template<typename T, typename ...Args>
-		auto &addComponent(el::Type_c<T> const &, Args&&... args) const noexcept {
+		auto &addComponent(el::Type_c<T>, Args&&... args) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -175,7 +175,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		auto &removeComponent(el::Type_c<T> const &) const noexcept {
+		auto &removeComponent(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -194,7 +194,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		bool hasTag(el::Type_c<T> const &) const noexcept {
+		bool hasTag(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -213,7 +213,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		auto &addTag(el::Type_c<T> const &) const noexcept {
+		auto &addTag(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -233,7 +233,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		auto &removeTag(el::Type_c<T> const &) const noexcept {
+		auto &removeTag(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -249,12 +249,12 @@ namespace ecs {
 		}
 
 		template<typename T>
-		ifIsComponent<T, T&> operator[](el::Type_c<T> const &) const noexcept {
+		ifIsComponent<T, T&> operator[](el::Type_c<T>) const noexcept {
 			return this->template getComponent<T>();
 		}
 
 		template<typename T>
-		ifIsTag<T, bool> operator[](el::Type_c<T> const &) const noexcept {
+		ifIsTag<T, bool> operator[](el::Type_c<T>) const noexcept {
 			return this->template hasTag<T>();
 		}
 
@@ -266,7 +266,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		ifIsComponent<T, bool> operator&(el::Type_c<T> const &) const noexcept {
+		ifIsComponent<T, bool> operator&(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -275,7 +275,7 @@ namespace ecs {
 		}
 
 		template<typename T>
-		ifIsTag<T, bool> operator&(el::Type_c<T> const &) const noexcept {
+		ifIsTag<T, bool> operator&(el::Type_c<T>) const noexcept {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -284,7 +284,7 @@ namespace ecs {
 		}
 
         template<typename T>
-		ifIsComponent<T, Self&> operator<<(el::Type_c<T> const &) {
+		ifIsComponent<T, Self&> operator<<(el::Type_c<T>) {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -294,7 +294,7 @@ namespace ecs {
 		}
 
         template<typename T>
-		ifIsTag<T, Self&> operator<<(el::Type_c<T> const &) {
+		ifIsTag<T, Self&> operator<<(el::Type_c<T>) {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 
@@ -314,7 +314,7 @@ namespace ecs {
 		}
 
         template<typename T>
-		ifIsComponent<T, Self&> operator>>(el::Type_c<T> const &) {
+		ifIsComponent<T, Self&> operator>>(el::Type_c<T>) {
 			auto &mgr = this->_mgr;
 			auto dataIdx = this->_dataIdx;
 

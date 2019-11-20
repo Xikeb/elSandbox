@@ -5,31 +5,31 @@
 
 	namespace el {
 		namespace impl {
-			template<typename Filter, typename ...Keep>
+			template<typename Pred, typename ...Keep>
 			constexpr auto filter(
-				el::Type_c<el::type_list<Keep...>> const &result,
+				el::Type_c<el::type_list<Keep...>> const &,
 				el::Type_c<el::type_list<>> const &,
-				Filter&&
+				Pred&&
 			) noexcept
 			{
-				return result;
+				return el::type_list<Keep...>{};
 			}
 
-			template<typename Filter, typename ...Keep, typename THead, typename ...TRest>
+			template<typename Pred, typename ...Keep, typename THead, typename ...TRest>
 			constexpr auto filter(
 				el::Type_c<el::type_list<Keep...>> const &,
 				el::Type_c<el::type_list<THead, TRest...>> const &,
-				Filter&& f
+				Pred&& f
 			) noexcept
 			{
-				return el::impl::filter<Filter>(
+				return el::impl::filter<Pred>(
 					el::type_c<el::conditional_t<
 						decltype(f(el::type_c<THead>))::value,
 						el::type_list<Keep..., THead>,
 						el::type_list<Keep...>
 					>>,
 					el::type_c<el::type_list<TRest...>>,
-					std::forward<Filter>(f)
+					std::forward<Pred>(f)
 				);
 			}
 		} // impl

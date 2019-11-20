@@ -66,26 +66,32 @@ namespace ecs {
 			alignof(SystemOf<Spec>)
 		>;
 
+		constexpr static auto specifications = Specifications{};
 		template<typename Spec>
-		constexpr static size_t specId = Specifications::template IndexOf<Spec>::value;
+		constexpr static std::size_t specId = specifications.index_of(el::type_c<Spec>);
+		template<std::size_t Id>
+		constexpr static auto specById = specifications.at(el::size_c<Id>{});
 		template<typename Spec>
-		constexpr static bool isOwnSpec = Specifications::template Contains<Spec>::value;
+		constexpr static bool isOwnSpec = specifications.contains(el::type_c<Spec>);
+		template<std::size_t Id>
+		constexpr static bool isOwnSpecId = Id < specifications.size;
 
-		struct is_not_void {
-			template<typename T>
-			constexpr static auto value = !el::is_same<
-				typename SystemOf<T>::Signature,
-				void
-			>{};
+		// struct is_not_void {
+		// 	template<typename T>
+		// 	constexpr static auto value = !el::is_same<
+		// 		typename SystemOf<T>::Signature,
+		// 		void
+		// 	>{};
 
-			template<typename T>
-			constexpr auto operator()() const noexcept { return value<T>; }
+		// 	template<typename T>
+		// 	constexpr auto operator()() const noexcept { return value<T>; }
 
-			template<typename T>
-			constexpr auto operator()(el::Type_c<T>) const noexcept { return value<T>; }
-		};
+		// 	template<typename T>
+		// 	constexpr auto operator()(el::Type_c<T>) const noexcept { return value<T>; }
+		// };
 
-		using AutomaticSystems = typename Specifications::template Filter<is_not_void>;
+		// using AutomaticSystems = typename Specifications::template Filter<is_not_void>;
+		constexpr static auto automaticSystems = specifications.filter([](auto t) { return el::bool_c<t != el::type_c<void>>{}; });
 
 		static_assert(
 			ecs::detail::is_settings<Settings>,
@@ -101,14 +107,10 @@ namespace ecs {
 		});
 		*/
 
-		constexpr Machinery(Manager &mgr) noexcept:
-		manager(mgr), constructed(0)
-		{
+		constexpr Machinery(Manager &mgr) noexcept: manager(mgr) {
 		}
 
-		constexpr Machinery(Manager &mgr, Specs const &...) noexcept:
-		manager(mgr), constructed(0)
-		{
+		constexpr Machinery(Manager &mgr, Specs const &...) noexcept: manager(mgr) {
 		}
 
 		template<typename Spec>
@@ -124,32 +126,33 @@ namespace ecs {
 		}
 
 		template<typename Spec>
-		auto &getSystem() noexcept {
+		auto &getSystem(el::Type_c<Spec> = {}) noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}
 
 		template<typename Spec>
-		auto const &getSystem() const noexcept {
+		auto const &getSystem(el::Type_c<Spec> = {}) const noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}
 
 		template<size_t Id>
-		auto &getSystem() noexcept {
-			static_assert(Id < Specifications::size, ECS_SPEC_OUT_OF_BOUNDS);
+		auto &getSystem(el::size_c<Id> = {}) noexcept {
+			static_assert(isOwnSpecId<Id>, ECS_SPEC_OUT_OF_BOUNDS);
 			return this->system<Id>();
 		}
 
 		template<size_t Id>
-		auto const &getSystem() const noexcept {
-			static_assert(Id < Specifications::size, ECS_SPEC_OUT_OF_BOUNDS);
+		auto const &getSystem(el::size_c<Id> = {}) const noexcept {
+			static_assert(isOwnSpecId<Id>, ECS_SPEC_OUT_OF_BOUNDS);
 			return this->system<Id>();
 		}
 
+		//cannot be overloaded for type_c and size_c constants because
+		// we need the already constructed specs, as it contains the resulting system's callback function
 		template<typename Spec, typename ...Args>
-		auto &construct(Spec const &spec, Args&&... args) noexcept(noexcept(std::declval<SystemOf<Spec>>(std::declval<Args>()...)))
-		{
+		auto &construct(Spec const &spec, Args&&... args) noexcept(noexcept(std::declval<SystemOf<Spec>>(std::declval<Args>()...))) {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			auto &sys = this->system<Spec>();
 			
@@ -159,7 +162,7 @@ namespace ecs {
 		}
 
 		Manager &manager;
-		std::bitset<sizeof...(Specs)> constructed;
+		std::bitset<sizeof...(Specs)> constructed{0};
 		std::tuple<SystemStorage<Specs>...> systems;
 
 	private:

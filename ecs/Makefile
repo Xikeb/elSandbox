@@ -30,6 +30,13 @@ TESTSRCS	=	$(TESTSRCSDIR)/Entity_test.cpp			\
 				$(TESTSRCSDIR)/Manager_test.cpp			\
 				$(TESTSRCSDIR)/main_test.cpp
 
+EXAMPLENAME = example
+
+EXAMPLESRCSDIR = ./src/example
+EXAMPLESRCS = $(EXAMPLESRCSDIR)/main.cpp
+
+EXAMPLEOBJS		=	$(EXAMPLESRCS:.cpp=.o)
+
 # TESTSRCS	=	$(patsubst $(SRCSDIR)/%.cpp, $(TESTSRCSDIR)/%_test.cpp, $(SRCS))
 
 TESTOBJS	=	$(TESTSRCS:.cpp=.o)
@@ -57,11 +64,14 @@ test: $(TESTOBJS)
 $(NAME): $(OBJS)
 	 $(CXX) $(OBJS) -o $(NAME) $(LDFLAGS)
 
+$(EXAMPLENAME): $(EXAMPLEOBJS)
+	 $(CXX) $(EXAMPLEOBJS) -o $(EXAMPLENAME) $(LDFLAGS)
+
 clean:
-	$(RM) $(OBJS) $(TESTOBJS)
+	$(RM) $(OBJS) $(TESTOBJS) $(EXAMPLEOBJS)
 
 fclean: clean
-	$(RM) $(NAME) $(TESTNAME)
+	$(RM) $(NAME) $(TESTNAME) $(EXAMPLENAME)
 
 re: fclean all
 retest: fclean test

@@ -15,16 +15,13 @@ namespace ecs {
 		constexpr static std::size_t tagCount = TagList::size;
 		using Storage = std::bitset<componentCount + tagCount>;
 
-		constexpr SignatureBitset(): _bitset(0)
-		{
+		constexpr SignatureBitset(): _bitset(0) {
 		}
 
-		SignatureBitset(char const bits[componentCount + tagCount]): _bitset(bits)
-		{
+		SignatureBitset(char const bits[componentCount + tagCount]): _bitset(bits) {
 		}
 
-		SignatureBitset(Storage bits): _bitset(bits)
-		{
+		SignatureBitset(Storage bits): _bitset(bits) {
 		}
 
 		template<typename T>
@@ -45,87 +42,75 @@ namespace ecs {
 		template<typename T>
 		constexpr static std::size_t tagBit = componentCount + tagId<T>;
 
-		Self &reset() noexcept
-		{
+		Self &reset() noexcept {
 			this->_bitset.reset();
 			return *this;
 		}
 
 		template<typename T>
-		bool hasComponent() const noexcept
-		{
+		bool hasComponent() const noexcept {
 			static_assert(isComponent<T>, "Self isn't a Component according to Settings");
 			return this->_bitset.test(componentBit<T>);
 		}
 
 		template<typename T>
-		Self &enableComponent() noexcept
-		{
+		Self &enableComponent() noexcept {
 			static_assert(isComponent<T>, "Self isn't a Component according to Settings");
 			this->_bitset.set(componentBit<T>);
 			return *this;
 		}
 
 		template<typename T>
-		Self &disableComponent() noexcept
-		{
+		Self &disableComponent() noexcept {
 			static_assert(isComponent<T>, "Self isn't a Component according to Settings");
 			this->_bitset.reset(componentBit<T>);
 			return *this;
 		}
 
 		template<typename T>
-		Self &toggleComponent() noexcept
-		{
+		Self &toggleComponent() noexcept {
 			static_assert(isComponent<T>, "Self isn't a Component according to Settings");
 			this->_bitset.flip(componentBit<T>);
 			return *this;
 		}
 
 		template<typename T>
-		bool hasTag() const noexcept
-		{
+		bool hasTag() const noexcept {
 			static_assert(isTag<T>, "Self isn't a Tag according to Settings");
 			return this->_bitset.test(tagBit<T>);
 		}
 
 		template<typename T>
-		Self &enableTag() noexcept
-		{
+		Self &enableTag() noexcept {
 			static_assert(isTag<T>, "Self isn't a Tag according to Settings");
 			this->_bitset.set(tagBit<T>);
 			return *this;
 		}
 
 		template<typename T>
-		Self &disableTag() noexcept
-		{
+		Self &disableTag() noexcept {
 			static_assert(isTag<T>, "Self isn't a Tag according to Settings");
 			this->_bitset.reset(tagBit<T>);
 			return *this;
 		}
 
 		template<typename T>
-		Self &toggleTag() noexcept
-		{
+		Self &toggleTag() noexcept {
 			static_assert(isTag<T>, "Self isn't a Tag according to Settings");
 			this->_bitset.flip(tagBit<T>);
 			return *this;
 		}
 
-		bool matches(Self const &oth) const noexcept
-		{
+		bool matches(Self const &oth) const noexcept {
 			return (this->_bitset & oth._bitset) == this->_bitset;
 		}
 
-		bool matches(Storage const &oth) const noexcept
-		{
+		bool matches(Storage const &oth) const noexcept {
 			return (this->_bitset & oth) == this->_bitset;
 		}
 
 		template<typename OthSettings>
-		bool matches(SignatureBitset<OthSettings> const &oth) const noexcept
-		{
+		bool matches(SignatureBitset<OthSettings> const &oth) const noexcept {
 			static_assert(el::is_same_v<OthSettings, Settings>, "Trying to compare SignatureBitsets of different Settings");
 			return (this->_bitset & oth._bitset) == this->_bitset;
 		}

@@ -25,6 +25,8 @@
 	#include "el/type_list/reduce.hpp"
 	#include "el/type_list/some.hpp"
 	#include "el/type_list/contains.hpp"
+	#include "el/type_list/index_of.hpp"
+	#include "el/type_list/at.hpp"
 
 	namespace el {
 		template <typename ...Types>
@@ -34,8 +36,6 @@
 		template<>
 		struct type_list<> {
 			using Self = el::type_list<>;
-
-			constexpr type_list() { }
 
 			constexpr static std::size_t size = 0;
 
@@ -78,6 +78,11 @@
 			template<std::size_t N = 1>
 			constexpr static auto shift(el::size_c<N> = {}) noexcept { return el::type_list<>{}; }
 
+			template<typename T>
+			constexpr static auto contains(el::Type_c<T> = {}) noexcept { return el::impl::contains<T>(el::type_c<Self>, 0); }
+			template<typename T>
+			constexpr static auto index_of(el::Type_c<T> = {}) noexcept { return el::impl::index_of<T>(el::size_c<0>{}, el::type_c<Self>, 0); }
+
 			template<typename TF, typename ...Args>
 			constexpr static auto for_each(TF&& f, Args&&...) noexcept { return std::move(f); }
 
@@ -98,27 +103,11 @@
 			using Next = type_list<TRest...>;
 			using First = THead;
 
-			constexpr type_list() = default;
-
 			constexpr static std::size_t size = 1 + sizeof...(TRest);
 
 			template<typename T>
 			struct Contains: TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0)) {
 			};
-
-			struct Has {
-				constexpr Has() = default;
-				template<typename T>
-				constexpr auto operator()() const noexcept {
-					return TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0))();
-				}
-				template<typename T>
-				constexpr auto operator()(el::Type_c<T>) const noexcept {
-					return TYPE_OF(el::impl::contains<T>(el::type_c<Self>, 0))();
-				}
-			};
-
-			constexpr static Has has{};
 
 			template<typename TElem, std::size_t TPos = 0>
 			using IndexOf = typename el::conditional_t<
@@ -150,25 +139,36 @@
 			template<std::size_t N = 1>
 			constexpr static auto shift(el::size_c<N> = {}) noexcept { return el::type_list<>{}; }
 
-			template<typename Cond>
-			constexpr static auto filter(Cond&& c) {
+			template<typename T>
+			constexpr static auto contains(el::Type_c<T> = {}) noexcept { return el::impl::contains<T>(el::type_c<Self>, 0); }
+			template<typename T>
+			constexpr static auto index_of(el::Type_c<T> = {}) noexcept { return el::impl::index_of<T>(el::size_c<0>{}, el::type_c<Self>, 0); }
+			template<std::size_t Id>
+			constexpr static auto at(el::size_c<Id> idx = {}) noexcept {
+				static_assert(Id < Self::size, "type_list.at(): Index out of bounds");
+				return el::impl::at(el::type_c<Self>, idx, 0);
+			}
+
+
+			template<typename Pred>
+			constexpr static auto filter(Pred&& c) {
 				return el::impl::filter(
 					el::type_c<el::type_list<>>,
 					el::type_c<Self>,
-					std::forward<Cond>(c)
+					std::forward<Pred>(c)
 				);
 			}
 
-			/*template<typename Cond>
-			using Filter = el::type_of<decltype(el::impl::filter<Cond>(
+			/*template<typename Pred>
+			using Filter = el::type_of<decltype(el::impl::filter<Pred>(
 				el::type_c<el::type_list<>>,
 				el::type_c<Self>
 			))>;*/
-			template<typename Cond>
+			template<typename Pred>
 			using Filter = TYPE_OF(el::impl::filter(
 				el::type_c<el::type_list<>>,
 				el::type_c<Self>,
-				Cond{}
+				Pred{}
 			));
 
 			template<typename TF, typename ...Args>

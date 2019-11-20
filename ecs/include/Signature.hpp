@@ -24,33 +24,69 @@ namespace ecs {
 		};
 	} // impl
 
+	/**
+	 * original version, before the tests with the value semantics version type_list
+	 */
+	// template<typename TSettings, typename ...TTypes>
+	// class Signature {
+	// public:
+	// 	using Settings = ecs::detail::get_basic_settings<TSettings>;
+	// 	using Types = el::type_list<TTypes...>;
+	// 	/*using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
+	// 	using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;*/
+	// 	using Components = typename Types::template Filter<typename Settings::ComponentList::Has>;
+	// 	using Tags = typename Types::template Filter<typename Settings::TagList::Has>;
+	// 	using Required = Types;
+
+	// 	constexpr Signature()
+	// 	{
+	// 		Components::for_each([&](auto &&e, auto &&) {
+	// 			this->_sto.template enableComponent<TYPE_OF(e)>();
+	// 		});
+	// 		Tags::for_each([&](auto &&e, auto &&) {
+	// 			this->_sto.template enableTag<TYPE_OF(e)>();
+	// 		});
+	// 	}
+
+	// 	constexpr static std::size_t componentCount = Components::size;
+	// 	constexpr static std::size_t tagCount = Tags::size;
+
+	// 	template<typename OthSettings>
+	// 	bool compare(SignatureBitset<OthSettings> const &othPrint) const noexcept
+	// 	{
+	// 		return this->_sto.matches(othPrint);
+	// 	}
+
+	// 	SignatureBitset<Settings> getBitset() const noexcept { return this->_sto; }
+	// private:
+	// 	SignatureBitset<Settings> _sto;
+	// };
+
 	template<typename TSettings, typename ...TTypes>
 	class Signature {
 	public:
 		using Settings = ecs::detail::get_basic_settings<TSettings>;
-		using Types = el::type_list<TTypes...>;
-		/*using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
-		using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;*/
-		using Components = typename Types::template Filter<typename Settings::ComponentList::Has>;
-		using Tags = typename Types::template Filter<typename Settings::TagList::Has>;
-		using Required = Types;
+		constexpr static auto types = el::type_list<TTypes...>{};
+		
+		constexpr static auto componentList = typename Settings::ComponentList{};
+		constexpr static auto ownComponents = types.filter([](auto t) { return componentList.contains(t); });
+		constexpr static std::size_t componentCount = ownComponents.size;
 
-		constexpr Signature()
-		{
-			Components::for_each([&](auto &&e, auto &&) {
+		constexpr static auto tagList = typename Settings::TagList{};
+		constexpr static auto ownTags = types.filter([](auto t) { return tagList.contains(t); });
+		constexpr static std::size_t tagCount = ownTags.size;
+
+		constexpr Signature() {
+			ownComponents.for_each([this](auto e, auto) {
 				this->_sto.template enableComponent<TYPE_OF(e)>();
 			});
-			Tags::for_each([&](auto &&e, auto &&) {
+			ownTags.for_each([this](auto e, auto) {
 				this->_sto.template enableTag<TYPE_OF(e)>();
 			});
 		}
 
-		constexpr static std::size_t componentCount = Components::size;
-		constexpr static std::size_t tagCount = Tags::size;
-
 		template<typename OthSettings>
-		bool compare(SignatureBitset<OthSettings> const &othPrint) const noexcept
-		{
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const noexcept {
 			return this->_sto.matches(othPrint);
 		}
 

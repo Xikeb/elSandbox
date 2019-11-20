@@ -12,16 +12,13 @@
 			constexpr Type_c() noexcept = default;
 			constexpr Type_c(T const &) noexcept {}
 
-			constexpr bool operator==(el::Type_c<T>)			const noexcept { return true; }
-			constexpr bool operator==(el::Type_c<T> const &)	const noexcept { return true; }
-			constexpr bool operator==(el::Type_c<T>&&)			const noexcept { return true; }
+			constexpr bool operator==(Self const &)	const noexcept { return true; }
 
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U>)			const noexcept { return false; }
-			template<typename U>
 			constexpr bool operator==(el::Type_c<U> const &)	const noexcept { return false; }
-			template<typename U>
-			constexpr bool operator==(el::Type_c<U>&&)			const noexcept { return false; }
+
+			template<typename Any>
+			constexpr bool operator!=(Any const &t) const noexcept { return !(*this == t); }
 
 			auto operator+() const noexcept { return static_cast<Self const &&>(*this); }
 		};
@@ -32,16 +29,10 @@
 
 			constexpr Type_c() noexcept = default;
 
-			constexpr bool operator==(el::Type_c<void>)			const noexcept { return true; }
-			constexpr bool operator==(el::Type_c<void> const &)	const noexcept { return true; }
-			constexpr bool operator==(el::Type_c<void>&&)		const noexcept { return true; }
+			constexpr bool operator==(Self const &)	const noexcept { return true; }
 
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U>)			const noexcept { return false; }
-			template<typename U>
 			constexpr bool operator==(el::Type_c<U> const &)	const noexcept { return false; }
-			template<typename U>
-			constexpr bool operator==(el::Type_c<U>&&)			const noexcept { return false; }
 
 			auto operator+() const noexcept { return static_cast<Self const &&>(*this); }
 		};

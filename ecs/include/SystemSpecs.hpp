@@ -112,11 +112,11 @@ namespace ecs {
 		}
 
 		template<typename TSig>
-		constexpr auto matching() const noexcept { //Write entire system execution yourself
+		constexpr auto matching() const noexcept {
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, TSig>(this->callback);
 		}
 
-		constexpr auto manual() const noexcept {
+		constexpr auto manual() const noexcept { //Write entire system execution yourself
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, void>(this->callback);
 		}
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "el/is_same.hpp"
 #include "el/type_list/type_list.hpp"
 
 namespace ecs {
@@ -25,18 +26,23 @@ namespace ecs {
 	};
 
 	namespace impl {
-		template<typename T> struct is_settings;
+		// template<typename T> struct is_settings;
 		template<typename T> struct is_basic_settings;
 
-		template<typename T>
-		struct is_settings: el::false_c
-		{
-		};
+		// template<typename T>
+		// struct is_settings: el::false_c
+		// {
+		// };
 
-		template<typename TComponentList, typename TTagList>
-		struct is_settings<ecs::Settings<TComponentList, TTagList>>: el::true_c
-		{
-		};
+		// template<typename TComponentList, typename TTagList>
+		// struct is_settings<ecs::Settings<TComponentList, TTagList>>: el::true_c
+		// {
+		// };
+
+		template<typename T>
+		using is_settings = el::is_similar<ecs::Settings, T>;
+		template<typename T>
+		constexpr static auto is_settings_v = is_settings<T>::value;
 
 		template<typename T>
 		struct is_basic_settings: el::false_c
