@@ -77,12 +77,8 @@ namespace ecs {
 		constexpr static std::size_t tagCount = ownTags.size;
 
 		constexpr Signature() {
-			ownComponents.for_each([this](auto e, auto) {
-				this->_sto.template enableComponent<TYPE_OF(e)>();
-			});
-			ownTags.for_each([this](auto e, auto) {
-				this->_sto.template enableTag<TYPE_OF(e)>();
-			});
+			ownComponents.for_each([this](auto e, auto) { this->_sto.enableComponent(e); });
+			ownTags.for_each([this](auto e, auto) { this->_sto.enableTag(e); });
 		}
 
 		template<typename OthSettings>
