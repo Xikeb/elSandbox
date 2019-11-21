@@ -30,7 +30,7 @@ namespace ecs {
 	} // impl
 
 	template<typename FCallback = void(void),
-		typename TDependencyList = el::type_list<>,
+		typename TDependencyList = el::type_list_t<>,
 		typename TInstance = void,
 		typename TSignature = void>
 	class SystemSpecs {
@@ -97,7 +97,7 @@ namespace ecs {
 		}
 
 		template<typename ...Requirements>
-		constexpr auto after(el::Type_c<el::type_list<Requirements...>>) const noexcept {
+		constexpr auto after(el::Type_c<el::type_list_t<Requirements...>>) const noexcept {
 			return ecs::SystemSpecs<
 				Callback,
 				typename Dependencies::template Push<Requirements...>,

@@ -7,28 +7,28 @@
 		namespace impl {
 			template<typename Pred, typename ...Keep>
 			constexpr auto filter(
-				el::Type_c<el::type_list<Keep...>> const &,
-				el::Type_c<el::type_list<>> const &,
+				el::Type_c<el::type_list_t<Keep...>> const &,
+				el::Type_c<el::type_list_t<>> const &,
 				Pred&&
 			) noexcept
 			{
-				return el::type_list<Keep...>{};
+				return el::type_list_t<Keep...>{};
 			}
 
 			template<typename Pred, typename ...Keep, typename THead, typename ...TRest>
 			constexpr auto filter(
-				el::Type_c<el::type_list<Keep...>> const &,
-				el::Type_c<el::type_list<THead, TRest...>> const &,
+				el::Type_c<el::type_list_t<Keep...>> const &,
+				el::Type_c<el::type_list_t<THead, TRest...>> const &,
 				Pred&& f
 			) noexcept
 			{
 				return el::impl::filter<Pred>(
 					el::type_c<el::conditional_t<
 						decltype(f(el::type_c<THead>))::value,
-						el::type_list<Keep..., THead>,
-						el::type_list<Keep...>
+						el::type_list_t<Keep..., THead>,
+						el::type_list_t<Keep...>
 					>>,
-					el::type_c<el::type_list<TRest...>>,
+					el::type_c<el::type_list_t<TRest...>>,
 					std::forward<Pred>(f)
 				);
 			}

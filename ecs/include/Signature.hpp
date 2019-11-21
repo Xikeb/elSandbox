@@ -31,7 +31,7 @@ namespace ecs {
 	// class Signature {
 	// public:
 	// 	using Settings = ecs::detail::get_basic_settings<TSettings>;
-	// 	using Types = el::type_list<TTypes...>;
+	// 	using Types = el::type_list_t<TTypes...>;
 	// 	/*using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
 	// 	using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;*/
 	// 	using Components = typename Types::template Filter<typename Settings::ComponentList::Has>;
@@ -66,7 +66,7 @@ namespace ecs {
 	class Signature {
 	public:
 		using Settings = ecs::detail::get_basic_settings<TSettings>;
-		constexpr static auto types = el::type_list<TTypes...>{};
+		constexpr static auto types = el::type_list_t<TTypes...>{};
 		
 		constexpr static auto componentList = typename Settings::ComponentList{};
 		constexpr static auto ownComponents = types.filter([](auto t) { return componentList.contains(t); });
@@ -111,7 +111,7 @@ namespace ecs {
 			"Operands of signature logic classes must all "
 			"implement the concept of Signature.");
 
-		using SignatureList = el::type_list<TSigs...>;
+		using SignatureList = el::type_list_t<TSigs...>;
 		// using Settings = typename SignatureList::First::Settings;
 		constexpr SignatureAnd() = default;
 
@@ -160,7 +160,7 @@ namespace ecs {
 			"Operands of signature logic classes must all "
 			"implement the concept of Signature.");
 
-		using SignatureList = el::type_list<TSigs...>;
+		using SignatureList = el::type_list_t<TSigs...>;
 		constexpr SignatureOr() = default;
 
 		constexpr SignatureOr(TSigs&&... sigs): _sigs(sigs...)

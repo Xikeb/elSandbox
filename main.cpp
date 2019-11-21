@@ -56,9 +56,6 @@ int utests_elMeta()
 	pretty_print(Likes::IndexOf<std::tuple<double, double>>{ });
 	cout << endl;
 
-	cout << "<IsEnd> test:\t\t";
-	pretty_print(el::IsEnd<el::type_list<>>{ });
-
 	cout << "<is_same> test:\t\t";
 	pretty_print(el::is_same<Likes::Current, int>{ });
 

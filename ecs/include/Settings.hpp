@@ -4,9 +4,9 @@
 
 namespace ecs {
 	template<typename ...Types>
-	using ComponentList = el::type_list<Types...>;
+	using ComponentList = el::type_list_t<Types...>;
 	template<typename ...Types>
-	using TagList = el::type_list<Types...>;
+	using TagList = el::type_list_t<Types...>;
 
 	template<typename TComponentList, typename TTagList>
 	struct BasicSettings {

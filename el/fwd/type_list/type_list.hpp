@@ -3,6 +3,6 @@
 
 	namespace el {
 		template<typename ...Types>
-		struct type_list;
+		struct type_list_t;
 	} // el
 #endif // ELMETA_FWD_TYPELIST_HPP

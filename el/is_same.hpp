@@ -1,12 +1,5 @@
-/*
- * type_list.h
- *
- *  Created on: 22 nov. 2017
- *      Author: eliord
- */
-
-#ifndef IS_SAME_H_
-# define IS_SAME_H_
+#ifndef ELMETA_IS_SAME_H_
+# define ELMETA_IS_SAME_H_
 
 # include "el/types/integral_c.hpp"
 
@@ -45,4 +38,4 @@ namespace el {
 	template<template<typename ...> class T, typename U>
 	constexpr bool is_similar_v = el::is_similar<T, U>::value;
 }
-#endif /*IS_SAME_H_*/
+#endif /*ELMETA_IS_SAME_H_*/

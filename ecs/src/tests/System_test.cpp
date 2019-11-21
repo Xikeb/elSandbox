@@ -107,7 +107,7 @@ TEST(SystemTest, ImageAndSignature) {
 // 	};
 // 	auto print = ecs::makeSystem(printCallback)
 // 		.template instantiateWith<int>()
-// 		.after(el::type_c<el::type_list<>>)
+// 		.after(el::type_c<el::type_list_t<>>)
 // 		.matching(el::type_c<test::HasString>)()
 // 	;
 // }
