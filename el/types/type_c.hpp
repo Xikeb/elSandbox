@@ -5,17 +5,17 @@
 
 	namespace el {
 		template<typename T>
-		struct Type_c {
+		struct type_t {
 			using type = T;
-			using Self = el::Type_c<type>;
+			using Self = el::type_t<type>;
 
-			constexpr Type_c() noexcept = default;
-			constexpr Type_c(T const &) noexcept {}
+			constexpr type_t() noexcept = default;
+			constexpr type_t(T const &) noexcept {}
 
 			constexpr bool operator==(Self const &)	const noexcept { return true; }
 
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U> const &)	const noexcept { return false; }
+			constexpr bool operator==(el::type_t<U> const &)	const noexcept { return false; }
 
 			template<typename Any>
 			constexpr bool operator!=(Any const &t) const noexcept { return !(*this == t); }
@@ -23,16 +23,16 @@
 			auto operator+() const noexcept { return static_cast<Self const &&>(*this); }
 		};
 		template<>
-		struct Type_c<void> {
+		struct type_t<void> {
 			using type = void;
-			using Self = el::Type_c<type>;
+			using Self = el::type_t<type>;
 
-			constexpr Type_c() noexcept = default;
+			constexpr type_t() noexcept = default;
 
 			constexpr bool operator==(Self const &)	const noexcept { return true; }
 
 			template<typename U>
-			constexpr bool operator==(el::Type_c<U> const &)	const noexcept { return false; }
+			constexpr bool operator==(el::type_t<U> const &)	const noexcept { return false; }
 
 			auto operator+() const noexcept { return static_cast<Self const &&>(*this); }
 		};
@@ -49,11 +49,11 @@
 		template<typename T>
 		constexpr auto make_type(T&&) noexcept
 		{
-			return el::Type_c<el::remove_ref_t<T>>();
+			return el::type_t<el::remove_ref_t<T>>();
 		}
 
 		template<typename T>
-		constexpr static el::Type_c<T> type_c = {};
+		constexpr static el::type_t<T> type_c = {};
 
 		template<typename T>
 		using type_of = typename el::remove_ref_t<T>::type;

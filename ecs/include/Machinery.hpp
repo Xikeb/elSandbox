@@ -51,7 +51,7 @@ namespace ecs {
 		using Self = ecs::Machinery<TSettings, Specs...>;
 		using Settings = TSettings;
 		using Manager = ecs::Manager<Settings>;
-		using Specifications = el::type_list<Specs...>;
+		using Specifications = el::type_list_t<Specs...>;
 
 		template<typename T>
 		using SystemOf = decltype(std::declval<T>().system());
@@ -87,7 +87,7 @@ namespace ecs {
 		// 	constexpr auto operator()() const noexcept { return value<T>; }
 
 		// 	template<typename T>
-		// 	constexpr auto operator()(el::Type_c<T>) const noexcept { return value<T>; }
+		// 	constexpr auto operator()(el::type_t<T>) const noexcept { return value<T>; }
 		// };
 
 		// using AutomaticSystems = typename Specifications::template Filter<is_not_void>;
@@ -126,13 +126,13 @@ namespace ecs {
 		}
 
 		template<typename Spec>
-		auto &getSystem(el::Type_c<Spec> = {}) noexcept {
+		auto &getSystem(el::type_t<Spec> = {}) noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}
 
 		template<typename Spec>
-		auto const &getSystem(el::Type_c<Spec> = {}) const noexcept {
+		auto const &getSystem(el::type_t<Spec> = {}) const noexcept {
 			static_assert(isOwnSpec<Spec>, ECS_UNKNOWN_SPEC);
 			return this->system<Spec>();
 		}

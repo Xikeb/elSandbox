@@ -21,7 +21,7 @@
 			}
 
 			template<typename TFirst, typename TSecond>
-			constexpr auto is_pair(el::Type_c<el::pair<TFirst, TSecond>>) noexcept
+			constexpr auto is_pair(el::type_t<el::pair<TFirst, TSecond>>) noexcept
 			{
 				return el::true_c{};
 			}
@@ -41,16 +41,16 @@
 			}
 
 			template<typename Key>
-			constexpr auto count(el::Type_c<Key> const &)
+			constexpr auto count(el::type_t<Key> const &)
 			{
 				return 0;
 			}
 
 			template<typename Key, typename HKey, typename HValue, typename ...Keys, typename ...Values>
 			constexpr auto count(
-				el::Type_c<Key> const &me,
-				el::Type_c<el::pair<HKey, HValue>> const &,
-				el::Type_c<el::pair<Keys, Values>> const &... rest
+				el::type_t<Key> const &me,
+				el::type_t<el::pair<HKey, HValue>> const &,
+				el::type_t<el::pair<Keys, Values>> const &... rest
 			) noexcept
 			{
 				return (el::is_same<Key, HKey>::value ? 1 : 0) + count(me, rest...);
@@ -58,9 +58,9 @@
 
 			template<typename Key, typename HValue, typename ...Keys, typename ...Values>
 			constexpr auto get_pair_by_key(
-				el::Type_c<Key>,
-				el::Type_c<el::pair<Key, HValue>> head,
-				el::Type_c<el::pair<Keys, Values>>...
+				el::type_t<Key>,
+				el::type_t<el::pair<Key, HValue>> head,
+				el::type_t<el::pair<Keys, Values>>...
 			) noexcept
 			{
 				return head;
@@ -68,7 +68,7 @@
 
 			template<typename Key>
 			constexpr auto get_pair_by_key(
-				el::Type_c<Key>
+				el::type_t<Key>
 			) noexcept
 			{
 				return el::type_c<void>;
@@ -78,10 +78,10 @@
 				typename ...Pairs, typename HValue,
 				typename ...Keys, typename ...Values>
 			constexpr auto replace_key(
-				el::Type_c<el::map<Pairs...>>,
-				el::Type_c<el::map<el::pair<Key, HValue>, el::pair<Keys, Values>...>>,
-				el::Type_c<Key>,
-				el::Type_c<el::pair<NKey, NValue>>,
+				el::type_t<el::map<Pairs...>>,
+				el::type_t<el::map<el::pair<Key, HValue>, el::pair<Keys, Values>...>>,
+				el::type_t<Key>,
+				el::type_t<el::pair<NKey, NValue>>,
 				int
 			) {
 				return el::type_c<el::map<
@@ -95,10 +95,10 @@
 				typename ...Pairs, typename HKey, typename HValue,
 				typename ...Keys, typename ...Values>
 			constexpr auto replace_key(
-				el::Type_c<el::map<Pairs...>>,
-				el::Type_c<el::map<el::pair<HKey, HValue>, el::pair<Keys, Values>...>>,
-				el::Type_c<Key> from,
-				el::Type_c<el::pair<NKey, NValue>> to,
+				el::type_t<el::map<Pairs...>>,
+				el::type_t<el::map<el::pair<HKey, HValue>, el::pair<Keys, Values>...>>,
+				el::type_t<Key> from,
+				el::type_t<el::pair<NKey, NValue>> to,
 				...
 			) {
 				return el::impl::replace_key(
@@ -153,7 +153,7 @@
 			}
 
 			template<typename Key>
-			constexpr auto &get(el::Type_c<Key> const &key) noexcept
+			constexpr auto &get(el::type_t<Key> const &key) noexcept
 			{
 				using Pair = typename decltype(el::impl::get_pair_by_key(key, el::type_c<el::pair<Keys, Values>>...))::type;
 				static_assert(!el::is_same<Pair, void>::value, "Map has no such key");
@@ -162,7 +162,7 @@
 			}
 
 			template<typename Key>
-			constexpr auto &operator[](el::Type_c<Key> const &key) noexcept
+			constexpr auto &operator[](el::type_t<Key> const &key) noexcept
 			{
 				return this->get(key);
 			}
@@ -179,7 +179,7 @@
 			)>;
 
 			template<typename Key, typename NKey, typename NValue>
-			constexpr auto replace_pair(el::Type_c<Key>, el::Type_c<el::pair<NKey, NValue>>) noexcept
+			constexpr auto replace_pair(el::type_t<Key>, el::type_t<el::pair<NKey, NValue>>) noexcept
 			{
 				/*using TYPE_OF(el::impl::replace_key(
 					el::type_c<el::map<>>,

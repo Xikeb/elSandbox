@@ -7,8 +7,8 @@
 		namespace impl {
 			template<typename Pred, typename ...Keep>
 			constexpr auto filter(
-				el::Type_c<el::type_list_t<Keep...>> const &,
-				el::Type_c<el::type_list_t<>> const &,
+				el::type_t<el::type_list_t<Keep...>> const &,
+				el::type_t<el::type_list_t<>> const &,
 				Pred&&
 			) noexcept
 			{
@@ -17,8 +17,8 @@
 
 			template<typename Pred, typename ...Keep, typename THead, typename ...TRest>
 			constexpr auto filter(
-				el::Type_c<el::type_list_t<Keep...>> const &,
-				el::Type_c<el::type_list_t<THead, TRest...>> const &,
+				el::type_t<el::type_list_t<Keep...>> const &,
+				el::type_t<el::type_list_t<THead, TRest...>> const &,
 				Pred&& f
 			) noexcept
 			{

@@ -34,15 +34,15 @@
 			template<typename>
 			using Contains = el::false_c;
 
-			struct Has {
-				template<typename T>
-				constexpr auto operator()() const noexcept { return el::false_c{}; }
-
-				template<typename T>
-				constexpr auto operator()(el::Type_c<T>) const noexcept { return el::false_c{}; }
-			};
-
-			constexpr static Has has{};
+//			struct Has {
+//				template<typename T>
+//				constexpr auto operator()() const noexcept { return el::false_c{}; }
+//
+//				template<typename T>
+//				constexpr auto operator()(el::type_t<T>) const noexcept { return el::false_c{}; }
+//			};
+//
+//			constexpr static Has has{};
 
 			template<typename, std::size_t = 0>
 			using IndexOf = el::false_c;
@@ -59,11 +59,11 @@
 			template<typename ...Ts>
 			constexpr static auto push() noexcept { return el::type_list_t<Ts...>{}; }
 			template<typename ...Ts>
-			constexpr static auto push(el::Type_c<Ts>...) noexcept { return el::type_list_t<Ts...>{}; }
+			constexpr static auto push(el::type_t<Ts>...) noexcept { return el::type_list_t<Ts...>{}; }
 			template<typename ...Ts>
 			constexpr static auto unshift() noexcept { return el::type_list_t<Ts...>{}; }
 			template<typename ...Ts>
-			constexpr static auto unshift(el::Type_c<Ts>...) noexcept { return el::type_list_t<Ts...>{}; }
+			constexpr static auto unshift(el::type_t<Ts>...) noexcept { return el::type_list_t<Ts...>{}; }
 
 			template<std::size_t N = 1>
 			constexpr static auto pop(el::size_c<N> = {}) noexcept { return el::type_list_t<>{}; }
@@ -71,9 +71,9 @@
 			constexpr static auto shift(el::size_c<N> = {}) noexcept { return el::type_list_t<>{}; }
 
 			template<typename T>
-			constexpr static auto contains(el::Type_c<T> = {}) noexcept { return el::impl::contains<T>(el::type_c<Self>, 0); }
+			constexpr static auto contains(el::type_t<T> = {}) noexcept { return el::impl::contains<T>(el::type_c<Self>, 0); }
 			template<typename T>
-			constexpr static auto index_of(el::Type_c<T> = {}) noexcept { return el::impl::index_of<T>(el::size_c<0>{}, el::type_c<Self>, 0); }
+			constexpr static auto index_of(el::type_t<T> = {}) noexcept { return el::impl::index_of<T>(el::size_c<0>{}, el::type_c<Self>, 0); }
 
 			template<typename TF, typename ...Args>
 			constexpr static auto for_each(TF&& f, Args&&...) noexcept { return std::move(std::forward<TF>(f)); }
@@ -109,7 +109,7 @@
 			>;
 
 			template<std::size_t Pos>
-			using At = decltype(el::impl::at(el::type_c<Self>, el::size_c<Pos>{}, 0));
+			using At = typename decltype(+el::impl::at(el::type_c<Self>, el::size_c<Pos>{}, 0))::type;
 
 			using Shift = Next;
 			template<typename ...T>
@@ -120,11 +120,11 @@
 			template<typename ...Ts>
 			constexpr static auto push() noexcept { return el::type_list_t<THead, TRest..., Ts...>{}; }
 			template<typename ...Ts>
-			constexpr static auto push(el::Type_c<Ts>...) noexcept { return el::type_list_t<THead, TRest..., Ts...>{}; }
+			constexpr static auto push(el::type_t<Ts>...) noexcept { return el::type_list_t<THead, TRest..., Ts...>{}; }
 			template<typename ...Ts>
 			constexpr static auto unshift() noexcept { return el::type_list_t<Ts..., THead, TRest...>{}; }
 			template<typename ...Ts>
-			constexpr static auto unshift(el::Type_c<Ts>...) noexcept { return el::type_list_t<Ts..., THead, TRest...>{}; }
+			constexpr static auto unshift(el::type_t<Ts>...) noexcept { return el::type_list_t<Ts..., THead, TRest...>{}; }
 
 			template<std::size_t N = 1>
 			constexpr static auto pop(el::size_c<N> = {}) noexcept { return el::type_list_t<>{}; }
@@ -132,9 +132,9 @@
 			constexpr static auto shift(el::size_c<N> = {}) noexcept { return el::type_list_t<>{}; }
 
 			template<typename T>
-			constexpr static auto contains(el::Type_c<T> = {}) noexcept { return el::impl::contains<T>(el::type_c<Self>, 0); }
+			constexpr static auto contains(el::type_t<T> = {}) noexcept { return el::impl::contains<T>(el::type_c<Self>, 0); }
 			template<typename T>
-			constexpr static auto index_of(el::Type_c<T> = {}) noexcept { return el::impl::index_of<T>(el::size_c<0>{}, el::type_c<Self>, 0); }
+			constexpr static auto index_of(el::type_t<T> = {}) noexcept { return el::impl::index_of<T>(el::size_c<0>{}, el::type_c<Self>, 0); }
 			template<std::size_t Id>
 			constexpr static auto at(el::size_c<Id> idx = {}) noexcept {
 				static_assert(Id < Self::size, "type_list.at(): Index out of bounds");
@@ -201,10 +201,13 @@
 					int{}
 				);
 			}
+
+			template <std::size_t Id>
+			constexpr auto operator[](el::size_c<Id> idx) const noexcept { return this->at(idx); }
 		};
 
 		template<typename ...Types>
-		constexpr static auto type_list = el::type_list_t<Types...>;
+		constexpr static auto type_list = el::type_list_t<Types...>{};
 
 		namespace impl {
 			template<typename T>
@@ -218,20 +221,20 @@
 		/*
 		 * At
 		 */
-		namespace impl {
-			template<typename std::size_t pos, typename List>
-			struct at_helper {
-				using Type = typename el::enable_if<
-					el::detail::exists<typename List::Next>::value,
-					typename el::impl::at_helper<pos - 1, typename List::Next>::Type
-				>::type;
-			};
-
-			template<typename List>
-			struct at_helper<0, List> {
-				using Type = typename List::Current;
-			};
-		} // impl
+//		namespace impl {
+//			template<typename std::size_t pos, typename List>
+//			struct at_helper {
+//				using Type = typename el::enable_if<
+//					el::detail::exists<typename List::Next>::value,
+//					typename el::impl::at_helper<pos - 1, typename List::Next>::Type
+//				>::type;
+//			};
+//
+//			template<typename List>
+//			struct at_helper<0, List> {
+//				using Type = typename List::Current;
+//			};
+//		} // impl
 
 		/*
 		 * Tag

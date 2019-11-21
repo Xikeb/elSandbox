@@ -72,7 +72,7 @@ namespace ecs {
 		}
 
 		template<typename Image>
-		constexpr auto instantiateWith(el::Type_c<Image>) const noexcept {
+		constexpr auto instantiateWith(el::type_t<Image>) const noexcept {
 			return ecs::SystemSpecs<
 				Callback,
 				Dependencies,
@@ -97,7 +97,7 @@ namespace ecs {
 		}
 
 		template<typename ...Requirements>
-		constexpr auto after(el::Type_c<el::type_list_t<Requirements...>>) const noexcept {
+		constexpr auto after(el::type_t<el::type_list_t<Requirements...>>) const noexcept {
 			return ecs::SystemSpecs<
 				Callback,
 				typename Dependencies::template Push<Requirements...>,
@@ -107,7 +107,7 @@ namespace ecs {
 		}
 
 		template<typename TSig>
-		constexpr auto matching(el::Type_c<TSig>) const noexcept {
+		constexpr auto matching(el::type_t<TSig>) const noexcept {
 			return ecs::SystemSpecs<Callback, Dependencies, Instance, TSig>(this->callback);
 		}
 
