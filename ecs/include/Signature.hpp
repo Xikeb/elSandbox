@@ -24,44 +24,6 @@ namespace ecs {
 		};
 	} // impl
 
-	/**
-	 * original version, before the tests with the value semantics version type_list
-	 */
-	// template<typename TSettings, typename ...TTypes>
-	// class Signature {
-	// public:
-	// 	using Settings = ecs::detail::get_basic_settings<TSettings>;
-	// 	using Types = el::type_list_t<TTypes...>;
-	// 	/*using Components = el::type_of<decltype(Types::filter(Settings::ComponentList::has))>;
-	// 	using Tags = el::type_of<decltype(Types::filter(Settings::TagList::has))>;*/
-	// 	using Components = typename Types::template Filter<typename Settings::ComponentList::Has>;
-	// 	using Tags = typename Types::template Filter<typename Settings::TagList::Has>;
-	// 	using Required = Types;
-
-	// 	constexpr Signature()
-	// 	{
-	// 		Components::for_each([&](auto &&e, auto &&) {
-	// 			this->_sto.template enableComponent<TYPE_OF(e)>();
-	// 		});
-	// 		Tags::for_each([&](auto &&e, auto &&) {
-	// 			this->_sto.template enableTag<TYPE_OF(e)>();
-	// 		});
-	// 	}
-
-	// 	constexpr static std::size_t componentCount = Components::size;
-	// 	constexpr static std::size_t tagCount = Tags::size;
-
-	// 	template<typename OthSettings>
-	// 	bool compare(SignatureBitset<OthSettings> const &othPrint) const noexcept
-	// 	{
-	// 		return this->_sto.matches(othPrint);
-	// 	}
-
-	// 	SignatureBitset<Settings> getBitset() const noexcept { return this->_sto; }
-	// private:
-	// 	SignatureBitset<Settings> _sto;
-	// };
-
 	template<typename TSettings, typename ...TTypes>
 	class Signature {
 	public:
@@ -86,7 +48,8 @@ namespace ecs {
 			return this->_sto.matches(othPrint);
 		}
 
-		SignatureBitset<Settings> getBitset() const noexcept { return this->_sto; }
+		SignatureBitset<Settings> &getBitset() noexcept { return this->_sto; }
+		SignatureBitset<Settings> const &getBitset() const noexcept { return this->_sto; }
 	private:
 		SignatureBitset<Settings> _sto;
 	};
@@ -112,45 +75,31 @@ namespace ecs {
 			"implement the concept of Signature.");
 
 		using SignatureList = el::type_list_t<TSigs...>;
+		constexpr static auto signatures = SignatureList{};
 		// using Settings = typename SignatureList::First::Settings;
 		constexpr SignatureAnd() = default;
 
-		constexpr SignatureAnd(TSigs&&... sigs): _sigs(sigs...)
-		{
+		constexpr SignatureAnd(TSigs&&... sigs): _sigs(std::forward<TSigs>(sigs)...) {
 		}
 
-		constexpr static std::size_t length = SignatureList::Current::List::size;
+		constexpr static std::size_t length = signatures.size;
 
 		template<typename OthSettings>
-		bool compare(SignatureBitset<OthSettings> const &othPrint) const
-		{
-			return this->compareImpl<0>(othPrint);
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const {
+			// return this->compareImpl<0>(othPrint);
+			return signatures.reduce([this, &othPrint](auto&&, auto idx, bool res) {
+				return res && std::get<idx()>(this->_sigs).compare(othPrint);
+			}, true);
 		}
 
-		el::enable_if_t<
-			(SignatureList::size > 0) && el::detail::andf(ecs::canGetBitset<TSigs>()...),
-			SignatureBitset<typename SignatureList::First::Settings>
-		>
-		getBitset() const noexcept
-		{ return this->_sto; }
+		// el::enable_if_t<
+		// 	(signatures.size > 0) && el::detail::andf(ecs::canGetBitset<TSigs>()...),
+		// 	SignatureBitset<typename SignatureList::First::Settings>
+		// >
+		// getBitset() const noexcept
+		// { return this->_sto; }
 	private:
 		std::tuple<TSigs...> _sigs;
-
-		template<typename OthSettings, std::size_t I>
-		el::enable_if_t<(I >= SignatureList::size), bool>
-		compareImpl(SignatureBitset<OthSettings> const &) const noexcept
-		{
-			return true;
-		}
-
-		template<typename OthSettings, std::size_t I>
-		el::enable_if_t<(I < SignatureList::size), bool>
-		compareImpl(SignatureBitset<OthSettings> const &othPrint) const noexcept
-		{
-			return std::get<I>(this->_sigs).compare(othPrint)
-				? this->compareImpl<I + 1>(othPrint)
-				: false;
-		}
 	};
 
 	template<typename ...TSigs>
@@ -161,36 +110,45 @@ namespace ecs {
 			"implement the concept of Signature.");
 
 		using SignatureList = el::type_list_t<TSigs...>;
+		constexpr static auto signatures = SignatureList{};
+
 		constexpr SignatureOr() = default;
 
-		constexpr SignatureOr(TSigs&&... sigs): _sigs(sigs...)
-		{
+		constexpr SignatureOr(TSigs&&... sigs): _sigs(sigs...) {
 		}
 
 		template<typename OthSettings>
-		bool compare(SignatureBitset<OthSettings> const &othPrint) const
-		{
-			return this->compareImpl<0>(othPrint);
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const {
+			// return this->compareImpl<0>(othPrint);
+			return signatures.reduce([this, &othPrint](auto&&, auto idx, bool res) {
+				return res || std::get<idx()>(this->_sigs).compare(othPrint);
+			}, false);
 		}
+
+		// template<typename OthSettings>
+		// bool compare(SignatureBitset<OthSettings> const &othPrint) const
+		// {
+		// 	return this->compareImpl<0>(othPrint);
+		// }
 
 	private:
 		std::tuple<TSigs...> _sigs;
 
-		template<typename OthSettings, std::size_t I>
-		el::enable_if_t<(I >= SignatureList::size), bool>
-		compareImpl(SignatureBitset<OthSettings> const &) const noexcept
-		{
-			return false;
-		}
+		// template<typename OthSettings, std::size_t I>
+		// el::enable_if_t<(I >= SignatureList::size), bool>
+		// compareImpl(SignatureBitset<OthSettings> const &) const noexcept
+		// {
+		// 	return false;
+		// }
 
-		template<typename OthSettings, std::size_t I>
-		el::enable_if_t<(I < SignatureList::size), bool>
-		compareImpl(SignatureBitset<OthSettings> const &othPrint) const noexcept
-		{
-			return std::get<I>(this->_sigs).compare(othPrint)
-				? true
-				: this->compareImpl<I + 1>(othPrint);
-		}
+		// template<typename OthSettings, std::size_t I>
+		// el::enable_if_t<(I < SignatureList::size), bool>
+		// compareImpl(SignatureBitset<OthSettings> const &othPrint) const noexcept
+		// {
+		// 	return std::get<I>(this->_sigs).compare(othPrint)
+		// 		? true
+		// 		: this->compareImpl<I + 1>(othPrint);
+		// }
 	};
 
 	template<typename TSig>
@@ -199,18 +157,16 @@ namespace ecs {
 		static_assert(decltype(ecs::isSignature(TSig()))::value,
 			"Operands of signature logic classes must all "
 			"implement the concept of Signature.");
-		constexpr SignatureNot() = default;
+		constexpr SignatureNot() noexcept = default;
 
-		constexpr SignatureNot(TSig&& sig): _sig(sig)
-		{
+		constexpr SignatureNot(TSig&& sig) noexcept(noexcept(std::declval<TSig>(std::forward<TSig>(sig)))): _sig(std::forward<TSig>(sig)) {
 		}
 
 		using Signature = TSig;
 		using Settings = typename Signature::Settings;
 
 		template<typename OthSettings>
-		bool compare(SignatureBitset<OthSettings> const &othPrint) const
-		{
+		bool compare(SignatureBitset<OthSettings> const &othPrint) const {
 			return !this->TSig::compare(othPrint);
 		}
 
